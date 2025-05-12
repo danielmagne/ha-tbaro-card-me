@@ -1,0 +1,16 @@
+{
+    "compilerOptions": {
+      "target": "es2020",
+      "module": "esnext",
+      "moduleResolution": "node",
+      "outDir": "dist",
+      "rootDir": "src",
+      "strict": true,
+      "esModuleInterop": true,
+      "moduleDetection": "force",
+      "allowSyntheticDefaultImports": true,
+      "useDefineForClassFields": false,
+      "experimentalDecorators": true,
+    },
+    "include": ["src"]
+  }

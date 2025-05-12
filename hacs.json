@@ -1,0 +1,9 @@
+{
+    "name": "ha-tbaro-card",
+    "content_in_root": false,
+    "filename": "dist/ha-tbaro-card.js",
+    "render_readme": true,
+    "description": "Beautiful customizable barometric gauge for Lovelace UI.",
+    "type": "plugin",
+    "domain": "lovelace"
+  }  
