@@ -108,7 +108,7 @@ export class HaTbaroCard extends LitElement {
 
   getWeatherInfo(p: number): { label: string; icon: string } {
     if (p < 980) return { label: "Tempête", icon: "storm" };
-    if (p < 1000) return { label: "Pluie probable", icon: "cloud" };
+    if (p < 1000) return { label: "Pluie probable", icon: "rain" };
     if (p < 1020) return { label: "Ciel dégagé", icon: "partly" };
     return { label: "Soleil radieux", icon: "sun" };
   }
