@@ -94,10 +94,10 @@ export class HaTbaroCard extends LitElement {
     if (!rawSvg) return svg``;
   
     return svg`
-      <g transform="translate(10, 10) scale(0.2)">
-        ${unsafeSVG(rawSvg)}
-      </g>
-    `;
+    <svg x="110" y="160" width="80" height="80" viewBox="0 0 1024 1024">
+      ${unsafeSVG(rawSvg)}
+    </svg>
+  `;
   }
   
 
