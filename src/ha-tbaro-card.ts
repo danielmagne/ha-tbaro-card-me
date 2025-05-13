@@ -3,6 +3,12 @@
 
 import { LitElement, html, css, svg, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+import { unsafeSVG } from 'lit/directives/unsafe-svg.js';
+
+import sunIcon from './icons/sun.svg';
+import rainIcon from './icons/rain.svg';
+import partlyIcon from './icons/partly.svg';
+import stormIcon from './icons/storm.svg';
 
 interface Segment {
   from: number;
@@ -78,29 +84,13 @@ export class HaTbaroCard extends LitElement {
   }
 
   getIcon(id: string) {
-    if (id === "sun") {
-      return svg`<circle cx="150" cy="180" r="14" fill="#FFD700" />`;
+    switch (id) {
+      case 'sun': return svg`${unsafeSVG(sunIcon)}`;
+      case 'rain': return svg`${unsafeSVG(rainIcon)}`;
+      case 'partly': return svg`${unsafeSVG(partlyIcon)}`;
+      case 'storm': return svg`${unsafeSVG(stormIcon)}`;
+      default: return svg``;
     }
-    if (id === "cloud") {
-      return svg`
-        <ellipse cx="150" cy="190" rx="20" ry="14" fill="#ccc" />
-        <circle cx="140" cy="182" r="10" fill="#ccc" />
-        <circle cx="160" cy="182" r="10" fill="#ccc" />`;
-    }
-    if (id === "storm") {
-      return svg`
-        <polygon points="145,160 140,180 150,180 143,195 165,170 155,170 160,160" fill="#cc0000" />
-        <ellipse cx="150" cy="180" rx="20" ry="14" fill="#ccc" />
-        <circle cx="140" cy="172" r="10" fill="#ccc" />
-        <circle cx="160" cy="172" r="10" fill="#ccc" />`;
-    }
-    if (id === "partly") {
-      return svg`<g transform="scale(0.05) translate(2500, 3100)">
-        <path d="M621.7 451.6m-129.5 0a129.5 129.5 0 1 0 259 0 129.5 129.5 0 1 0-259 0Z" fill="#F4CE26" />
-        <path d="M621.7 607.4c-85.9 0-155.8-69.9-155.8-155.8s69.9-155.8 155.8-155.8 155.8 69.9 155.8 155.8S707.6 607.4 621.7 607.4z" fill="#333333" />
-      </g>`;
-    }
-    return svg``;
   }
 
   getWeatherInfo(p: number): { label: string; icon: string } {
@@ -109,7 +99,7 @@ export class HaTbaroCard extends LitElement {
     if (p < 1020) return { label: "Ciel dégagé", icon: "partly" };
     return { label: "Soleil radieux", icon: "sun" };
   }
-  
+
   render() {
     const pressure = this.pressure;
     const { needle_color, tick_color, show_icon, stroke_width, size, segments } = this.config;
