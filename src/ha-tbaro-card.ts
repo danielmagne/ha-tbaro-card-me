@@ -101,8 +101,8 @@ export class HaTbaroCard extends LitElement {
     if (!src) return nothing;
   
     return html`
-    <img class="moon-img-svg" src="${src}" loading="lazy" />
-  `;
+      <img class="weather-img-svg" src="${src}" loading="lazy" />
+    `;
   }
   
 
@@ -161,8 +161,8 @@ export class HaTbaroCard extends LitElement {
           ${ticks}
           ${labels}
           ${needle}
-          ${this.config.show_icon ? this.getIcon(weather.icon) : nothing}
-          <text x="${cx}" y="${cy + 60}" font-size="14" class="label">${label}</text>
+          ${show_icon ? this.getIcon(weather.icon) : nothing}
+          <text x="${cx}" y="${cy + 60}" font-size="14" class="label">${weather.label}</text>
           <text x="${cx}" y="${cy + 85}" font-size="22" font-weight="bold" class="label">${pressure.toFixed(1)} hPa</text>
         </svg>`}
       </ha-card>
