@@ -84,14 +84,22 @@ export class HaTbaroCard extends LitElement {
   }
 
   getIcon(id: string) {
-    switch (id) {
-      case 'sun': return svg`${unsafeSVG(sunIcon)}`;
-      case 'rain': return svg`${unsafeSVG(rainIcon)}`;
-      case 'partly': return svg`${unsafeSVG(partlyIcon)}`;
-      case 'storm': return svg`${unsafeSVG(stormIcon)}`;
-      default: return svg``;
-    }
+    const rawSvg = {
+      sun: sunIcon,
+      rain: rainIcon,
+      partly: partlyIcon,
+      storm: stormIcon
+    }[id];
+  
+    if (!rawSvg) return svg``;
+  
+    return svg`
+      <g transform="translate(120, 190) scale(0.035)">
+        ${unsafeSVG(rawSvg)}
+      </g>
+    `;
   }
+  
 
   getWeatherInfo(p: number): { label: string; icon: string } {
     if (p < 980) return { label: "Tempête", icon: "storm" };
