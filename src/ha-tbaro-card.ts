@@ -77,6 +77,39 @@ export class HaTbaroCard extends LitElement {
     return `M ${s.x} ${s.y} A ${r} ${r} 0 ${largeArc} 1 ${e.x} ${e.y}`;
   }
 
+  getIcon(id: string) {
+    if (id === "sun") {
+      return svg`<circle cx="150" cy="180" r="14" fill="#FFD700" />`;
+    }
+    if (id === "cloud") {
+      return svg`
+        <ellipse cx="150" cy="190" rx="20" ry="14" fill="#ccc" />
+        <circle cx="140" cy="182" r="10" fill="#ccc" />
+        <circle cx="160" cy="182" r="10" fill="#ccc" />`;
+    }
+    if (id === "storm") {
+      return svg`
+        <polygon points="145,160 140,180 150,180 143,195 165,170 155,170 160,160" fill="#cc0000" />
+        <ellipse cx="150" cy="180" rx="20" ry="14" fill="#ccc" />
+        <circle cx="140" cy="172" r="10" fill="#ccc" />
+        <circle cx="160" cy="172" r="10" fill="#ccc" />`;
+    }
+    if (id === "partly") {
+      return svg`<g transform="scale(0.05) translate(2500, 3100)">
+        <path d="M621.7 451.6m-129.5 0a129.5 129.5 0 1 0 259 0 129.5 129.5 0 1 0-259 0Z" fill="#F4CE26" />
+        <path d="M621.7 607.4c-85.9 0-155.8-69.9-155.8-155.8s69.9-155.8 155.8-155.8 155.8 69.9 155.8 155.8S707.6 607.4 621.7 607.4z" fill="#333333" />
+      </g>`;
+    }
+    return svg``;
+  }
+
+  getWeatherInfo(p: number): { label: string; icon: string } {
+    if (p < 980) return { label: "Tempête", icon: "storm" };
+    if (p < 1000) return { label: "Pluie probable", icon: "cloud" };
+    if (p < 1020) return { label: "Ciel dégagé", icon: "partly" };
+    return { label: "Soleil radieux", icon: "sun" };
+  }
+  
   render() {
     const pressure = this.pressure;
     const { needle_color, tick_color, show_icon, stroke_width, size, segments } = this.config;
@@ -116,6 +149,7 @@ export class HaTbaroCard extends LitElement {
     })();
 
     const label = pressure > 1020 ? 'Soleil radieux' : pressure < 980 ? 'Tempête' : pressure < 1000 ? 'Pluie probable' : 'Ciel dégagé';
+    const weather = this.getWeatherInfo(pressure);
 
     return html`
       <ha-card style="box-shadow:none;background:transparent;border:none;border-radius:0;">
@@ -124,7 +158,7 @@ export class HaTbaroCard extends LitElement {
           ${ticks}
           ${labels}
           ${needle}
-          ${show_icon ? svg`` : nothing}
+          ${this.config.show_icon ? this.getIcon(weather.icon) : nothing}
           <text x="${cx}" y="${cy + 60}" font-size="14" class="label">${label}</text>
           <text x="${cx}" y="${cy + 85}" font-size="22" font-weight="bold" class="label">${pressure.toFixed(1)} hPa</text>
         </svg>`}
