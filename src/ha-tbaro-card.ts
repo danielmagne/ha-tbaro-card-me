@@ -100,9 +100,9 @@ export class HaTbaroCard extends LitElement {
     const src = svgMap[id];
     if (!src) return nothing;
   
-    return html`
-      <img class="weather-img-svg" src="${src}" loading="lazy" />
-    `;
+    return svg`
+    <image href="${src}" x="125" y="110" width="50" height="50" />
+  `;
   }
   
 
