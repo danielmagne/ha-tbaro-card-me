@@ -185,10 +185,11 @@ export class HaTbaroCard extends LitElement {
           ${ticks}
           ${labels}
           ${needle}
-          ${show_icon ? this.getIcon(weather.icon) : nothing}
+          
           <text x="${cx}" y="${cy + 60}" font-size="14" class="label">${weather.label}</text>
           <text x="${cx}" y="${cy + 85}" font-size="22" font-weight="bold" class="label">${pressure.toFixed(1)} hPa</text>
         </svg>`}
+        ${show_icon ? this.getIcon(weather.icon) : nothing}
       </ha-card>
     `;
   }
