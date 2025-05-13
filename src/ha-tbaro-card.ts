@@ -89,20 +89,13 @@ export class HaTbaroCard extends LitElement {
     return `M ${s.x} ${s.y} A ${r} ${r} 0 ${largeArc} 1 ${e.x} ${e.y}`;
   }
 
-  getIcon(id: string) {
-    const svgMap: Record<string, string> = {
+  getIconUrl(id: string): string | undefined {
+    return {
       sun: sunIcon,
       rain: rainIcon,
       partly: partlyIcon,
       storm: stormIcon,
-    };
-  
-    const src = svgMap[id];
-    if (!src) return nothing;
-  
-    return svg`
-    <image href="${src}" x="125" y="110" width="50" height="50" />
-  `;
+    }[id];
   }
   
 
@@ -161,9 +154,10 @@ export class HaTbaroCard extends LitElement {
           ${ticks}
           ${labels}
           ${needle}
-          ${this.config.show_icon ? this.getIcon(weather.icon) : nothing}
-          <text x="${cx}" y="${cy + 60}" font-size="14" class="label">${label}</text>
+          ${show_icon ? svg`<image href="${this.getIconUrl(weather.icon)}" x="125" y="160" width="50" height="50" />` : nothing}
+          <text x="${cx}" y="${cy + 60}" font-size="14" class="label">${weather.label}</text>
           <text x="${cx}" y="${cy + 85}" font-size="22" font-weight="bold" class="label">${pressure.toFixed(1)} hPa</text>
+
         </svg>`}
       </ha-card>
     `;
