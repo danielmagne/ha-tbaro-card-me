@@ -89,7 +89,7 @@ export class HaTbaroCard extends LitElement {
     return `M ${s.x} ${s.y} A ${r} ${r} 0 ${largeArc} 1 ${e.x} ${e.y}`;
   }
 
-  getIcon(id: string) {
+  getIcon2(id: string) {
     const svgMap: Record<string, string> = {
       sun: sunIcon,
       rain: rainIcon,
@@ -107,7 +107,26 @@ export class HaTbaroCard extends LitElement {
     `;
   }
   
-  
+  getIcon(id: string) {
+    const svgMap: Record<string, string> = {
+      sun: sunIcon,
+      rain: rainIcon,
+      partly: partlyIcon,
+      storm: stormIcon,
+    };
+
+    const raw = svgMap[id];
+    if (!raw) return nothing;
+
+    const encoded = encodeURIComponent(raw)
+      .replace(/'/g, '%27')
+      .replace(/"/g, '%22');
+    const dataUrl = `data:image/svg+xml,${encoded}`;
+
+    return html`
+      <img class="weather-img-svg" src="${dataUrl}" loading="lazy" width="40" height="40" style="display:block; margin: -30px auto 5px auto;" />
+    `;
+  }
   
   
 
