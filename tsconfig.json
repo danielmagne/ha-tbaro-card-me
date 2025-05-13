@@ -10,7 +10,10 @@
       "moduleDetection": "force",
       "allowSyntheticDefaultImports": true,
       "useDefineForClassFields": false,
-      "experimentalDecorators": true,
+      "experimentalDecorators": true
     },
-    "include": ["src"]
+    "include": [
+    "src",
+    "src/types.d.ts"
+  ]
   }

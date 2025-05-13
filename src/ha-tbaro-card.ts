@@ -5,6 +5,9 @@ import { LitElement, html, css, svg, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { unsafeSVG } from 'lit/directives/unsafe-svg.js';
 
+// Import des icônes SVG comme chaînes via rollup-plugin-string
+// @ts-ignore
+import weatherStyles from './styles.js';
 import sunIcon from './icons/sun.svg';
 import rainIcon from './icons/rain.svg';
 import partlyIcon from './icons/partly.svg';
@@ -31,20 +34,23 @@ export class HaTbaroCard extends LitElement {
   @property({ attribute: false }) hass: any;
   @property() config!: BaroCardConfig;
 
-  static styles = css`
-    :host {
-      display: block;
-    }
-    svg {
-      display: block;
-      margin: auto;
-    }
-    .label {
-      text-anchor: middle;
-      fill: #000;
-      font-family: sans-serif;
-    }
-  `;
+  static styles = [
+    css`
+      :host {
+        display: block;
+      }
+      svg {
+        display: block;
+        margin: auto;
+      }
+      .label {
+        text-anchor: middle;
+        fill: #000;
+        font-family: sans-serif;
+      }
+    `,
+    weatherStyles
+  ];
 
   setConfig(config: BaroCardConfig) {
     if (!config.entity) throw new Error("Entity is required");
@@ -84,24 +90,19 @@ export class HaTbaroCard extends LitElement {
   }
 
   getIcon(id: string) {
-    const rawSvg = {
+    const svgMap: Record<string, string> = {
       sun: sunIcon,
       rain: rainIcon,
       partly: partlyIcon,
-      storm: stormIcon
-    }[id];
+      storm: stormIcon,
+    };
   
-    if (!rawSvg) return svg``;
+    const src = svgMap[id];
+    if (!src) return nothing;
   
-    return svg`
-    <g transform="translate(120, 180)">
-      <svg viewBox="0 0 1024 1024" width="60" height="60">
-        ${unsafeSVG(rawSvg)}
-      </svg>
-    </g>
-  `;
-
-
+    return html`
+      <img class="weather-img-svg" src="${src}" loading="lazy" />
+    `;
   }
   
 
