@@ -96,12 +96,16 @@ export class HaTbaroCard extends LitElement {
       partly: partlyIcon,
       storm: stormIcon,
     };
-
+  
     const src = svgMap[id];
     if (!src) return nothing;
-
-    return svg`<image href="${src}" x="125" y="145" width="50" height="50" />`;
+  
+    return html`
+      <img class="weather-img-svg" src="${src}" loading="lazy" />
+    `;
   }
+  
+  
   
 
   getWeatherInfo(p: number): { label: string; icon: string } {
