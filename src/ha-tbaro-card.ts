@@ -32,7 +32,7 @@ interface BaroCardConfig {
 @customElement('ha-tbaro-card')
 export class HaTbaroCard extends LitElement {
   @property({ attribute: false }) hass: any;
-  @property() config!: BaroCardConfig;
+  @property({ type: Object }) config!: BaroCardConfig;
 
   static styles = [
     css`

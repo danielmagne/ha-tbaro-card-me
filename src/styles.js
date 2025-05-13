@@ -4,5 +4,7 @@ export default css`
   .weather-img-svg {
     width: 40px;
     height: 40px;
+    display: block;
+    margin: -8px auto 0 auto; /* <- remonte un peu l’icône */
   }
 `;
