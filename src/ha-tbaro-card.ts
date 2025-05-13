@@ -100,8 +100,8 @@ export class HaTbaroCard extends LitElement {
     const src = svgMap[id];
     if (!src) return nothing;
   
-    return svg`
-    <image href="${src}" x="125" y="110" width="50" height="50" />
+    return html`
+    <img class="moon-img-svg" src="${src}" loading="lazy" />
   `;
   }
   
