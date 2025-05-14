@@ -34,6 +34,8 @@ export class HaTbaroCard extends LitElement {
   @property({ attribute: false }) hass: any;
   @property({ type: Object }) config!: BaroCardConfig;
 
+  private _translations: Record<string, string> = {};
+
   static styles = [
     css`
       :host {
@@ -69,6 +71,21 @@ export class HaTbaroCard extends LitElement {
       ...config
     };
   }
+
+  async updated() {
+    const lang = this.hass?.locale?.language || 'en';
+  
+    if (!Object.keys(this._translations).length) {
+      try {
+        const module = await import(`../locales/${lang}.json`);
+        this._translations = module.default;
+      } catch (e) {
+        console.warn(`⚠️ No translations for language "${lang}"`);
+        this._translations = {};
+      }
+    }
+  }
+
 
   get pressure(): number {
     const state = this.hass.states[this.config.entity];
@@ -144,11 +161,11 @@ export class HaTbaroCard extends LitElement {
 
 
 
-  getWeatherInfo(p: number): { label: string; icon: string } {
-    if (p < 980) return { label: "Tempête", icon: "storm" };
-    if (p < 1000) return { label: "Pluie probable", icon: "rain" };
-    if (p < 1020) return { label: "Ciel dégagé", icon: "partly" };
-    return { label: "Soleil radieux", icon: "sun" };
+  getWeatherInfo(p: number): { key: string; icon: string } {
+    if (p < 980) return { key: "storm", icon: "storm" };
+    if (p < 1000) return { key: "rain", icon: "rain" };
+    if (p < 1020) return { key: "partly", icon: "partly" };
+    return { key: "sun", icon: "sun" };
   }
 
   render() {
@@ -189,8 +206,9 @@ export class HaTbaroCard extends LitElement {
         <circle cx="${cx}" cy="${cy}" r="10" fill="${tick_color}" />`;
     })();
 
-    const label = pressure > 1020 ? 'Soleil radieux' : pressure < 980 ? 'Tempête' : pressure < 1000 ? 'Pluie probable' : 'Ciel dégagé';
+    //const label = pressure > 1020 ? 'Soleil radieux' : pressure < 980 ? 'Tempête' : pressure < 1000 ? 'Pluie probable' : 'Ciel dégagé';
     const weather = this.getWeatherInfo(pressure);
+    const label = this._translations[weather.key] || weather.key;
 
     return html`
       <ha-card style="box-shadow:none;background:transparent;border:none;border-radius:0;">
@@ -200,7 +218,7 @@ export class HaTbaroCard extends LitElement {
           ${labels}
           ${needle}
           <image href="${this.getIconDataUrl(weather.icon)}" x="120" y="155" width="50" height="50" />
-          <text x="${cx}" y="${cy + 60}" font-size="14" class="label">${weather.label}</text>
+          <text x="${cx}" y="${cy + 60}" font-size="14" class="label">${label}</text>
           <text x="${cx}" y="${cy + 85}" font-size="22" font-weight="bold" class="label">${pressure.toFixed(1)} hPa</text>
         </svg>`}
 

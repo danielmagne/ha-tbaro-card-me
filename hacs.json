@@ -1,9 +1,13 @@
 {
     "name": "ha-tbaro-card",
-    "content_in_root": false,
-    "filename": "ha-tbaro-card.js",
-    "render_readme": true,
-    "description": "Beautiful customizable barometric gauge for Lovelace UI.",
+    "description": "Barometric gauge card for Home Assistant (SVG + dynamic icon)",
     "type": "plugin",
-    "domain": "lovelace"
-  }  
+    "keywords": ["barometer", "gauge", "weather", "svg"],
+    "render_readme": true,
+    "filename": "dist/ha-tbaro-card.js",
+    "domains": [],
+    "iot_class": "local_polling",
+    "country": "FR",
+    "content_in_root": false
+  }
+  
