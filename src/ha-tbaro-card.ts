@@ -41,10 +41,8 @@ export class HaTbaroCard extends LitElement {
   @property({ type: Object }) config!: BaroCardConfig;
 
   private _translations: Record<string, string> = {};
-  private static _localeMap: Record<string, Record<string, string>> = {
-    fr,
-    en
-  };
+  private static _localeMap: Record<string, Record<string, string>> = { fr, en };
+
 
   static styles = [
     css`
@@ -69,19 +67,7 @@ export class HaTbaroCard extends LitElement {
     if (!config.entity) throw new Error("Entity is required");
 
     const lang = config.language || this.hass?.locale?.language || 'en';
-
-      // Chargement synchronisé
-    try {
-      const locales: Record<string, Record<string, string>> = {
-        fr: require('../locales/fr.json'),
-        en: require('../locales/en.json'),
-        // ajoute d’autres langues ici si besoin
-      };
-      this._translations = locales[lang] || locales['en'];
-    } catch (e) {
-      console.warn(`❗ ha-tbaro-card: failed to load translation for ${lang}`);
-      this._translations = {};
-    }
+    this._translations = HaTbaroCard._localeMap[lang] || HaTbaroCard._localeMap['en'];
 
     this.config = {
       needle_color: '#000',
