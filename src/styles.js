@@ -5,6 +5,6 @@ export default css`
     width: 40px;
     height: 40px;
     display: block;
-    margin: -8px auto 0 auto; /* <- remonte un peu l’icône */
+    margin: -38px auto 0 auto; /* <- remonte un peu l’icône */
   }
 `;
