@@ -3,6 +3,7 @@ import typescript from '@rollup/plugin-typescript';
 import copy from 'rollup-plugin-copy';
 import { string } from 'rollup-plugin-string';
 import terser from '@rollup/plugin-terser';
+import json from '@rollup/plugin-json';
 
 export default {
   input: 'src/ha-tbaro-card.ts',
@@ -12,6 +13,7 @@ export default {
   },
   plugins: [
     resolve(),
+    json(), 
     typescript(),
     string({ include: '**/*.svg' }),
     terser() // ← minification ici

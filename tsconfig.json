@@ -10,7 +10,8 @@
       "moduleDetection": "force",
       "allowSyntheticDefaultImports": true,
       "useDefineForClassFields": false,
-      "experimentalDecorators": true
+      "experimentalDecorators": true,
+      "resolveJsonModule": true
     },
     "include": [
     "src",

@@ -13,6 +13,10 @@ import rainIcon from './icons/rain.svg';
 import partlyIcon from './icons/partly.svg';
 import stormIcon from './icons/storm.svg';
 
+
+import fr from '../locales/fr.json';
+import en from '../locales/en.json';
+
 interface Segment {
   from: number;
   to: number;
@@ -35,6 +39,10 @@ export class HaTbaroCard extends LitElement {
   @property({ type: Object }) config!: BaroCardConfig;
 
   private _translations: Record<string, string> = {};
+  private static _localeMap: Record<string, Record<string, string>> = {
+    fr,
+    en
+  };
 
   static styles = [
     css`
@@ -175,6 +183,9 @@ export class HaTbaroCard extends LitElement {
     const minP = 950, maxP = 1050;
     const angle = Math.PI * 0.75 + ((pressure - minP) / (maxP - minP)) * (Math.PI * 1.5);
 
+    const lang = this.hass?.locale?.language || 'en';
+    this._translations = HaTbaroCard._localeMap[lang] || HaTbaroCard._localeMap['en'];
+    
     const arcs = segments!.map(seg => {
       const aStart = Math.PI * 0.75 + ((seg.from - minP) / (maxP - minP)) * Math.PI * 1.5;
       const aEnd = Math.PI * 0.75 + ((seg.to - minP) / (maxP - minP)) * Math.PI * 1.5;
