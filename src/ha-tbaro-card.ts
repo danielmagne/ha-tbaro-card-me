@@ -125,7 +125,7 @@ export class HaTbaroCard extends LitElement {
     const dataUrl = `data:image/svg+xml,${encoded}`;
 
     return html`
-      <img class="weather-img-svg" src="${dataUrl}" loading="lazy" width="40" height="40" style="display:block; margin: -30px auto 5px auto;" />
+      <img class="weather-img-svg" src="${dataUrl}" loading="lazy" width="32" height="32" style="display:block; margin: -30px auto 5px auto;" />
     `;
   }
   
@@ -199,7 +199,7 @@ export class HaTbaroCard extends LitElement {
           ${ticks}
           ${labels}
           ${needle}
-          <image href="${this.getIconDataUrl(weather.icon)}" x="120" y="150" width="60" height="60" />
+          <image href="${this.getIconDataUrl(weather.icon)}" x="120" y="150" width="50" height="50" />
           <text x="${cx}" y="${cy + 60}" font-size="14" class="label">${weather.label}</text>
           <text x="${cx}" y="${cy + 85}" font-size="22" font-weight="bold" class="label">${pressure.toFixed(1)} hPa</text>
         </svg>`}

@@ -33,8 +33,8 @@ const ct={attribute:!0,type:String,converter:m,reflect:!1,hasChanged:A},dt=(t=ct
  * SPDX-License-Identifier: BSD-3-Clause
  */function pt(t){return(e,s)=>"object"==typeof s?dt(t,e,s):((t,e,s)=>{const i=e.hasOwnProperty(s);return e.constructor.createProperty(s,t),i?Object.getOwnPropertyDescriptor(e,s):void 0})(t,e,s)}var ut=r`
   .weather-img-svg {
-    width: 60px;
-    height: 60px;
+    width: 40px;
+    height: 40px;
     display: block;
     margin: -38px auto 0 auto; /* <- remonte un peu l’icône */
   }
@@ -43,7 +43,7 @@ const ct={attribute:!0,type:String,converter:m,reflect:!1,hasChanged:A},dt=(t=ct
         <img class="weather-img-svg" src="${e}" loading="lazy" />
       </div>
     `:q}getIcon(t){const e={sun:$t,rain:gt,partly:ft,storm:_t}[t];if(!e)return q;const s=encodeURIComponent(e).replace(/'/g,"%27").replace(/"/g,"%22");return B`
-      <img class="weather-img-svg" src="${`data:image/svg+xml,${s}`}" loading="lazy" width="40" height="40" style="display:block; margin: -30px auto 5px auto;" />
+      <img class="weather-img-svg" src="${`data:image/svg+xml,${s}`}" loading="lazy" width="32" height="32" style="display:block; margin: -30px auto 5px auto;" />
     `}getIconDataUrl(t){const e={sun:$t,rain:gt,partly:ft,storm:_t}[t];if(e)return`data:image/svg+xml,${encodeURIComponent(e).replace(/'/g,"%27").replace(/"/g,"%22")}`}getWeatherInfo(t){return t<980?{label:"Tempête",icon:"storm"}:t<1e3?{label:"Pluie probable",icon:"rain"}:t<1020?{label:"Ciel dégagé",icon:"partly"}:{label:"Soleil radieux",icon:"sun"}}render(){const t=this.pressure,{needle_color:e,tick_color:s,show_icon:i,stroke_width:n,size:o,segments:r}=this.config,l=150,a=150,h=110,c=950,d=.75*Math.PI+(t-c)/100*(1.5*Math.PI),p=r.map((t=>{const e=.75*Math.PI+(t.from-c)/100*Math.PI*1.5,s=.75*Math.PI+(t.to-c)/100*Math.PI*1.5;return Z`<path d="${this.describeArc(l,a,h,e,s)}" stroke="${t.color}" stroke-width="${n}" fill="none" />`})),u=Array.from({length:11},((t,e)=>950+10*e)).map((t=>{const e=.75*Math.PI+(t-c)/100*Math.PI*1.5,i=this.polar(l,a,126,e),n=this.polar(l,a,86,e);return Z`<line x1="${i.x}" y1="${i.y}" x2="${n.x}" y2="${n.y}" stroke="${s}" stroke-width="2" />`})),$=[960,980,1e3,1020,1040].map((t=>{const e=.75*Math.PI+(t-c)/100*Math.PI*1.5,s=this.polar(l,a,74,e);return Z`<text x="${s.x}" y="${s.y}" font-size="0.9em" font-weight="bolder" class="label">${t}</text>`})),g=(()=>{const t=this.polar(l,a,75,d),i=this.polar(l,a,16,d),n=d+Math.PI/2,o=i.x+5*Math.cos(n),r=i.y+5*Math.sin(n),h=i.x-5*Math.cos(n),c=i.y-5*Math.sin(n);return Z`
         <polygon points="${t.x},${t.y} ${o},${r} ${h},${c}" fill="${e}" />
         <circle cx="${l}" cy="${a}" r="10" fill="${s}" />`})(),f=this.getWeatherInfo(t);return B`
@@ -53,7 +53,7 @@ const ct={attribute:!0,type:String,converter:m,reflect:!1,hasChanged:A},dt=(t=ct
           ${u}
           ${$}
           ${g}
-          <image href="${this.getIconDataUrl(f.icon)}" x="120" y="150" width="60" height="60" />
+          <image href="${this.getIconDataUrl(f.icon)}" x="120" y="150" width="50" height="50" />
           <text x="${l}" y="${210}" font-size="14" class="label">${f.label}</text>
           <text x="${l}" y="${235}" font-size="22" font-weight="bold" class="label">${t.toFixed(1)} hPa</text>
         </svg>`}
