@@ -53,7 +53,7 @@ const ct={attribute:!0,type:String,converter:m,reflect:!1,hasChanged:A},dt=(t=ct
           ${u}
           ${$}
           ${g}
-          <image href="${this.getIconDataUrl(f.icon)}" x="120" y="120" width="50" height="50" />
+          <image href="${this.getIconDataUrl(f.icon)}" x="120" y="170" width="50" height="50" />
           <text x="${l}" y="${210}" font-size="14" class="label">${f.label}</text>
           <text x="${l}" y="${235}" font-size="22" font-weight="bold" class="label">${t.toFixed(1)} hPa</text>
         </svg>`}

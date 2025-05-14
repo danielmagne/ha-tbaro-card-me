@@ -199,7 +199,7 @@ export class HaTbaroCard extends LitElement {
           ${ticks}
           ${labels}
           ${needle}
-          <image href="${this.getIconDataUrl(weather.icon)}" x="120" y="120" width="50" height="50" />
+          <image href="${this.getIconDataUrl(weather.icon)}" x="120" y="170" width="50" height="50" />
           <text x="${cx}" y="${cy + 60}" font-size="14" class="label">${weather.label}</text>
           <text x="${cx}" y="${cy + 85}" font-size="22" font-weight="bold" class="label">${pressure.toFixed(1)} hPa</text>
         </svg>`}
