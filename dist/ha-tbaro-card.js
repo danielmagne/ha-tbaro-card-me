@@ -33,8 +33,8 @@ const ct={attribute:!0,type:String,converter:m,reflect:!1,hasChanged:A},dt=(t=ct
  * SPDX-License-Identifier: BSD-3-Clause
  */function pt(t){return(e,s)=>"object"==typeof s?dt(t,e,s):((t,e,s)=>{const i=e.hasOwnProperty(s);return e.constructor.createProperty(s,t),i?Object.getOwnPropertyDescriptor(e,s):void 0})(t,e,s)}var ut=r`
   .weather-img-svg {
-    width: 40px;
-    height: 40px;
+    width: 60px;
+    height: 60px;
     display: block;
     margin: -38px auto 0 auto; /* <- remonte un peu l’icône */
   }
