@@ -49,6 +49,8 @@ const ct={attribute:!0,type:String,converter:m,reflect:!1,hasChanged:C},dt=(t=ct
         <circle cx="${a}" cy="${h}" r="10" fill="${s}" />`})(),_=this.getWeatherInfo(t),y=this._translations[_.key]||_.key;return B`
       <ha-card style="box-shadow:none;background:transparent;border:none;border-radius:0;">
         ${F`<svg viewBox="0 0 300 300" style="max-width:${o}px;height:auto">
+        <circle cx="${a}" cy="${h}" r="${110.5}" fill="none" stroke="#000" stroke-width="1" />
+
           ${u}
           ${$}
           ${g}

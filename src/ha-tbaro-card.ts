@@ -185,7 +185,7 @@ export class HaTbaroCard extends LitElement {
 
     const lang = this.hass?.locale?.language || 'en';
     this._translations = HaTbaroCard._localeMap[lang] || HaTbaroCard._localeMap['en'];
-    
+
     const arcs = segments!.map(seg => {
       const aStart = Math.PI * 0.75 + ((seg.from - minP) / (maxP - minP)) * Math.PI * 1.5;
       const aEnd = Math.PI * 0.75 + ((seg.to - minP) / (maxP - minP)) * Math.PI * 1.5;
@@ -224,6 +224,8 @@ export class HaTbaroCard extends LitElement {
     return html`
       <ha-card style="box-shadow:none;background:transparent;border:none;border-radius:0;">
         ${svg`<svg viewBox="0 0 300 300" style="max-width:${size}px;height:auto">
+        <circle cx="${cx}" cy="${cy}" r="${r + 1 / 2}" fill="none" stroke="#000" stroke-width="1" />
+
           ${arcs}
           ${ticks}
           ${labels}
