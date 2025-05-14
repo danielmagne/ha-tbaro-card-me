@@ -86,20 +86,6 @@ export class HaTbaroCard extends LitElement {
     };
   }
 
-  async updated() {
-    const lang = this.hass?.locale?.language || 'en';
-  
-    if (!Object.keys(this._translations).length) {
-      try {
-        const module = await import(`../locales/${lang}.json`);
-        this._translations = module.default;
-      } catch (e) {
-        console.warn(`⚠️ No translations for language "${lang}"`);
-        this._translations = {};
-      }
-    }
-  }
-
 
   get pressure(): number {
     const state = this.hass.states[this.config.entity];
@@ -191,9 +177,6 @@ export class HaTbaroCard extends LitElement {
     const cx = 150, cy = 150, r = 110;
     const minP = 950, maxP = 1050;
     const angle = Math.PI * 0.75 + ((pressure - minP) / (maxP - minP)) * (Math.PI * 1.5);
-
-    const lang = this.hass?.locale?.language || 'en';
-    this._translations = HaTbaroCard._localeMap[lang] || HaTbaroCard._localeMap['en'];
 
     const arcs = segments!.map(seg => {
       const aStart = Math.PI * 0.75 + ((seg.from - minP) / (maxP - minP)) * Math.PI * 1.5;
