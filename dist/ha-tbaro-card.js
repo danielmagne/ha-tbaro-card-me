@@ -57,7 +57,7 @@ const ct={attribute:!0,type:String,converter:m,reflect:!1,hasChanged:A},dt=(t=ct
           <text x="${l}" y="${210}" font-size="14" class="label">${f.label}</text>
           <text x="${l}" y="${235}" font-size="22" font-weight="bold" class="label">${t.toFixed(1)} hPa</text>
         </svg>`}
-        ${i?this.getIcon(f.icon):q}
+
       </ha-card>
     `}};yt.styles=[r`
       :host {

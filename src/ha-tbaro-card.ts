@@ -107,6 +107,7 @@ export class HaTbaroCard extends LitElement {
     `;
   }
   
+  // pour créer un lien <img en HTML à partit d'une image en svg
   getIcon(id: string) {
     const svgMap: Record<string, string> = {
       sun: sunIcon,
@@ -202,8 +203,10 @@ export class HaTbaroCard extends LitElement {
           <text x="${cx}" y="${cy + 60}" font-size="14" class="label">${weather.label}</text>
           <text x="${cx}" y="${cy + 85}" font-size="22" font-weight="bold" class="label">${pressure.toFixed(1)} hPa</text>
         </svg>`}
-        ${show_icon ? this.getIcon(weather.icon) : nothing}
+
       </ha-card>
     `;
+    //  si on veut afficher une image en HTML: ${show_icon ? this.getIcon(weather.icon) : nothing}
+    // mais il faut le faire hors du svg.
   }
 }
