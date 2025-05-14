@@ -44,20 +44,20 @@ const ct={attribute:!0,type:String,converter:m,reflect:!1,hasChanged:C},dt=(t=ct
       </div>
     `:q}getIcon(t){const e={sun:gt,rain:ft,partly:_t,storm:yt}[t];if(!e)return q;const s=encodeURIComponent(e).replace(/'/g,"%27").replace(/"/g,"%22");return B`
       <img class="weather-img-svg" src="${`data:image/svg+xml,${s}`}" loading="lazy" width="32" height="32" style="display:block; margin: -30px auto 5px auto;" />
-    `}getIconDataUrl(t){const e={sun:gt,rain:ft,partly:_t,storm:yt}[t];if(e)return`data:image/svg+xml,${encodeURIComponent(e).replace(/'/g,"%27").replace(/"/g,"%22")}`}getWeatherInfo(t){return t<980?{key:"storm",icon:"storm"}:t<1e3?{key:"rain",icon:"rain"}:t<1020?{key:"partly",icon:"partly"}:{key:"sun",icon:"sun"}}render(){const t=this.pressure,{needle_color:e,tick_color:s,show_icon:i,stroke_width:n,size:o,segments:r}=this.config,a=150,h=150,l=110,c=950,d=.75*Math.PI+(t-c)/100*(1.5*Math.PI),p=this.hass?.locale?.language||"en";this._translations=ut._localeMap[p]||ut._localeMap.en;const u=r.map((t=>{const e=.75*Math.PI+(t.from-c)/100*Math.PI*1.5,s=.75*Math.PI+(t.to-c)/100*Math.PI*1.5;return F`<path d="${this.describeArc(a,h,l,e,s)}" stroke="${t.color}" stroke-width="${n}" fill="none" />`})),$=Array.from({length:11},((t,e)=>950+10*e)).map((t=>{const e=.75*Math.PI+(t-c)/100*Math.PI*1.5,i=this.polar(a,h,126,e),n=this.polar(a,h,86,e);return F`<line x1="${i.x}" y1="${i.y}" x2="${n.x}" y2="${n.y}" stroke="${s}" stroke-width="2" />`})),g=[960,980,1e3,1020,1040].map((t=>{const e=.75*Math.PI+(t-c)/100*Math.PI*1.5,s=this.polar(a,h,74,e);return F`<text x="${s.x}" y="${s.y}" font-size="0.9em" font-weight="bolder" class="label">${t}</text>`})),f=(()=>{const t=this.polar(a,h,75,d),i=this.polar(a,h,16,d),n=d+Math.PI/2,o=i.x+5*Math.cos(n),r=i.y+5*Math.sin(n),l=i.x-5*Math.cos(n),c=i.y-5*Math.sin(n);return F`
-        <polygon points="${t.x},${t.y} ${o},${r} ${l},${c}" fill="${e}" />
-        <circle cx="${a}" cy="${h}" r="10" fill="${s}" />`})(),_=this.getWeatherInfo(t),y=this._translations[_.key]||_.key;return B`
+    `}getIconDataUrl(t){const e={sun:gt,rain:ft,partly:_t,storm:yt}[t];if(e)return`data:image/svg+xml,${encodeURIComponent(e).replace(/'/g,"%27").replace(/"/g,"%22")}`}getWeatherInfo(t){return t<980?{key:"storm",icon:"storm"}:t<1e3?{key:"rain",icon:"rain"}:t<1020?{key:"partly",icon:"partly"}:{key:"sun",icon:"sun"}}render(){const t=this.pressure,{needle_color:e,tick_color:s,size:i,segments:n}=this.config,o=this.config.stroke_width??20,r=150,a=150,h=110,l=950,c=.75*Math.PI+(t-l)/100*(1.5*Math.PI),d=this.hass?.locale?.language||"en";this._translations=ut._localeMap[d]||ut._localeMap.en;const p=n.map((t=>{const e=.75*Math.PI+(t.from-l)/100*Math.PI*1.5,s=.75*Math.PI+(t.to-l)/100*Math.PI*1.5;return F`<path d="${this.describeArc(r,a,h,e,s)}" stroke="${t.color}" stroke-width="${o}" fill="none" />`})),u=Array.from({length:11},((t,e)=>950+10*e)).map((t=>{const e=.75*Math.PI+(t-l)/100*Math.PI*1.5,i=this.polar(r,a,126,e),n=this.polar(r,a,86,e);return F`<line x1="${i.x}" y1="${i.y}" x2="${n.x}" y2="${n.y}" stroke="${s}" stroke-width="2" />`})),$=[960,980,1e3,1020,1040].map((t=>{const e=.75*Math.PI+(t-l)/100*Math.PI*1.5,s=this.polar(r,a,74,e);return F`<text x="${s.x}" y="${s.y}" font-size="0.9em" font-weight="bolder" class="label">${t}</text>`})),g=(()=>{const t=this.polar(r,a,75,c),i=this.polar(r,a,16,c),n=c+Math.PI/2,o=i.x+5*Math.cos(n),h=i.y+5*Math.sin(n),l=i.x-5*Math.cos(n),d=i.y-5*Math.sin(n);return F`
+        <polygon points="${t.x},${t.y} ${o},${h} ${l},${d}" fill="${e}" />
+        <circle cx="${r}" cy="${a}" r="10" fill="${s}" />`})(),f=this.getWeatherInfo(t),_=this._translations[f.key]||f.key;return B`
       <ha-card style="box-shadow:none;background:transparent;border:none;border-radius:0;">
-        ${F`<svg viewBox="0 0 300 300" style="max-width:${o}px;height:auto">
-        <circle cx="${a}" cy="${h}" r="${110.5}" fill="none" stroke="#000" stroke-width="1" />
+        ${F`<svg viewBox="0 0 300 300" style="max-width:${i}px;height:auto">
+        <circle cx="${r}" cy="${a}" r="${h+o/2}" fill="none" stroke="#000" stroke-width="1" />
 
+          ${p}
           ${u}
           ${$}
           ${g}
-          ${f}
-          <image href="${this.getIconDataUrl(_.icon)}" x="120" y="155" width="50" height="50" />
-          <text x="${a}" y="${210}" font-size="14" class="label">${y}</text>
-          <text x="${a}" y="${235}" font-size="22" font-weight="bold" class="label">${t.toFixed(1)} hPa</text>
+          <image href="${this.getIconDataUrl(f.icon)}" x="120" y="155" width="50" height="50" />
+          <text x="${r}" y="${210}" font-size="14" class="label">${_}</text>
+          <text x="${r}" y="${235}" font-size="22" font-weight="bold" class="label">${t.toFixed(1)} hPa</text>
         </svg>`}
 
       </ha-card>

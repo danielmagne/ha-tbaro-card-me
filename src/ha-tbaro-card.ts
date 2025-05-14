@@ -178,7 +178,9 @@ export class HaTbaroCard extends LitElement {
 
   render() {
     const pressure = this.pressure;
-    const { needle_color, tick_color, show_icon, stroke_width, size, segments } = this.config;
+    const { needle_color, tick_color, size, segments } = this.config;
+    const stroke_width = this.config.stroke_width ?? 20;
+    
     const cx = 150, cy = 150, r = 110;
     const minP = 950, maxP = 1050;
     const angle = Math.PI * 0.75 + ((pressure - minP) / (maxP - minP)) * (Math.PI * 1.5);
@@ -224,7 +226,7 @@ export class HaTbaroCard extends LitElement {
     return html`
       <ha-card style="box-shadow:none;background:transparent;border:none;border-radius:0;">
         ${svg`<svg viewBox="0 0 300 300" style="max-width:${size}px;height:auto">
-        <circle cx="${cx}" cy="${cy}" r="${r + 1 / 2}" fill="none" stroke="#000" stroke-width="1" />
+        <circle cx="${cx}" cy="${cy}" r="${r + stroke_width / 2}" fill="none" stroke="#000" stroke-width="1" />
 
           ${arcs}
           ${ticks}
