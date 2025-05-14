@@ -1,6 +1,9 @@
 # ha-tbaro-card
 
 ![TBaro Card](https://img.shields.io/github/v/release/trollix/ha-tbaro-card)
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/trollix/ha-tbaro-card)](https://github.com/trollix/ha-tbaro-card/releases)
+![GitHub Release Date](https://img.shields.io/github/release-date/trollix/ha-tbaro-card)
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg?style=flat)](https://github.com/custom-components/hacs)
