@@ -3,5 +3,6 @@
     "description": "Barometric gauge card for Home Assistant (SVG + dynamic icon)",
     "keywords": ["barometer", "gauge", "weather", "svg"],
     "render_readme": true,
+    "content_in_root": true,
     "filename": "ha-tbaro-card.js"
   }
