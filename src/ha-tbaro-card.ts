@@ -25,6 +25,7 @@ interface Segment {
 
 interface BaroCardConfig {
   entity: string;
+  language?: string;
   needle_color?: string;
   tick_color?: string;
   show_icon?: boolean;
@@ -64,7 +65,24 @@ export class HaTbaroCard extends LitElement {
   ];
 
   setConfig(config: BaroCardConfig) {
+
     if (!config.entity) throw new Error("Entity is required");
+
+    const lang = config.language || this.hass?.locale?.language || 'en';
+
+      // Chargement synchronisé
+    try {
+      const locales: Record<string, Record<string, string>> = {
+        fr: require('../locales/fr.json'),
+        en: require('../locales/en.json'),
+        // ajoute d’autres langues ici si besoin
+      };
+      this._translations = locales[lang] || locales['en'];
+    } catch (e) {
+      console.warn(`❗ ha-tbaro-card: failed to load translation for ${lang}`);
+      this._translations = {};
+    }
+
     this.config = {
       needle_color: '#000',
       tick_color: '#000',
