@@ -70,6 +70,7 @@ export class HaTbaroCard extends LitElement {
       tick_color: '#000',
       show_icon: true,
       stroke_width: 20,
+      show_border: false,
       size: 300,
       segments: [
         { from: 950, to: 980, color: '#3399ff' },
@@ -179,8 +180,9 @@ export class HaTbaroCard extends LitElement {
 
   render() {
     const pressure = this.pressure;
-    const { needle_color, tick_color, size, show_border, segments } = this.config;
+    const { needle_color, tick_color, size, segments } = this.config;
     const stroke_width = this.config.stroke_width ?? 20;
+    const { show_border = false } = this.config;
 
     const cx = 150, cy = 150, r = 110;
     const minP = 950, maxP = 1050;
@@ -228,14 +230,7 @@ export class HaTbaroCard extends LitElement {
     const startAngle = Math.PI * 0.75;
     const endAngle = Math.PI * 2.25;
     const borderRadius = r + stroke_width / 2 + 0.5;   
-    const borderArc = svg`
-      <path
-        d="${this.describeArc(cx, cy, borderRadius, startAngle, endAngle)}"
-        stroke="#000"
-        stroke-width="1"
-        fill="none"
-      />
-    `;
+    const borderArc = svg`<path d="${this.describeArc(cx, cy, borderRadius, startAngle, endAngle)}" stroke="#000" stroke-width="1" fill="none" />`;
 
 
 // à ajouter avant ${arcs} si on veut un border 1px autour de la gauge:
