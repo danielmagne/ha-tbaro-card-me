@@ -226,7 +226,15 @@ export class HaTbaroCard extends LitElement {
     // début création border fer à cheval
     const startAngle = Math.PI * 0.75;
     const endAngle = Math.PI * 2.25;
-    const borderRadius = r + stroke_width / 2 + 0.5;
+    const borderRadius = r + stroke_width / 2 + 0.5;   
+    const borderArc = svg`
+      <path
+        d="${this.describeArc(cx, cy, borderRadius, startAngle, endAngle)}"
+        stroke="#000"
+        stroke-width="1"
+        fill="none"
+      />
+    `;
 
 
 // à ajouter avant ${arcs} si on veut un border 1px autour de la gauge:
@@ -234,10 +242,8 @@ export class HaTbaroCard extends LitElement {
 
     return html`
       <ha-card style="box-shadow:none;background:transparent;border:none;border-radius:0;">
-        ${svg`<svg viewBox="0 0 300 300" style="max-width:${size}px;height:auto">
-        
-          ${svg`<path d="${this.describeArc(cx, cy, borderRadius, startAngle, endAngle)}" stroke="#000" stroke-width="1" fill="none" />`}
-
+        ${svg`<svg viewBox="0 0 300 300" style="max-width:${size}px;height:auto">  
+          ${borderArc}
           ${arcs}
           ${ticks}
           ${labels}
