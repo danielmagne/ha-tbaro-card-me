@@ -30,6 +30,7 @@ interface BaroCardConfig {
   show_icon?: boolean;
   stroke_width?: number;
   size?: number;
+  show_border?: boolean;
   segments?: Segment[];
 }
 
@@ -178,7 +179,7 @@ export class HaTbaroCard extends LitElement {
 
   render() {
     const pressure = this.pressure;
-    const { needle_color, tick_color, size, segments } = this.config;
+    const { needle_color, tick_color, size, show_border, segments } = this.config;
     const stroke_width = this.config.stroke_width ?? 20;
 
     const cx = 150, cy = 150, r = 110;
@@ -243,7 +244,7 @@ export class HaTbaroCard extends LitElement {
     return html`
       <ha-card style="box-shadow:none;background:transparent;border:none;border-radius:0;">
         ${svg`<svg viewBox="0 0 300 300" style="max-width:${size}px;height:auto">  
-          ${borderArc}
+          ${show_border ? borderArc : nothing}
           ${arcs}
           ${ticks}
           ${labels}
