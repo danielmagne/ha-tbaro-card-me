@@ -1,0 +1,10 @@
+{
+  "homeassistant": "2024.5.0",
+  "hacs": "2.0.0",
+  "ha_tbaro_card": {
+    "version": "0.2.5",
+    "changelog": "https://github.com/trollix/ha-tbaro-card/releases/tag/v0.2.5"
+  }
+}
+
+  
