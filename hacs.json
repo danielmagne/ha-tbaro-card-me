@@ -4,10 +4,5 @@
     "type": "plugin",
     "keywords": ["barometer", "gauge", "weather", "svg"],
     "render_readme": true,
-    "filename": "dist/ha-tbaro-card.js",
-    "domains": [],
-    "iot_class": "local_polling",
-    "country": "FR",
-    "content_in_root": false
+    "filename": "ha-tbaro-card.js",
   }
-  
