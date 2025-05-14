@@ -128,7 +128,20 @@ export class HaTbaroCard extends LitElement {
     `;
   }
   
-  
+
+  getIconDataUrl(id: string): string | undefined {
+    const svgMap: Record<string, string> = {
+      sun: sunIcon,
+      rain: rainIcon,
+      partly: partlyIcon,
+      storm: stormIcon,
+    };
+    const raw = svgMap[id];
+    if (!raw) return undefined;
+    return `data:image/svg+xml,${encodeURIComponent(raw).replace(/'/g, '%27').replace(/"/g, '%22')}`;
+  }
+
+
 
   getWeatherInfo(p: number): { label: string; icon: string } {
     if (p < 980) return { label: "Tempête", icon: "storm" };
@@ -185,11 +198,11 @@ export class HaTbaroCard extends LitElement {
           ${ticks}
           ${labels}
           ${needle}
-          ${show_icon ? this.getIcon(weather.icon) : nothing}
+          <image href="${this.getIconDataUrl(weather.icon)}" x="120" y="150" width="60" height="60" />
           <text x="${cx}" y="${cy + 60}" font-size="14" class="label">${weather.label}</text>
           <text x="${cx}" y="${cy + 85}" font-size="22" font-weight="bold" class="label">${pressure.toFixed(1)} hPa</text>
         </svg>`}
-        
+        ${show_icon ? this.getIcon(weather.icon) : nothing}
       </ha-card>
     `;
   }
