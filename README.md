@@ -27,6 +27,10 @@ Barometric gauge card for Home Assistant — clean, customizable, SVG-based.
 
 ### Option 1: via HACS (recommended)
 
+✨ Install via HACS
+
+[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=trollix&repository=ha-tbaro-card)
+
 1. In Home Assistant, go to **HACS > Frontend > Custom Repositories**
 2. Add your repository: `https://github.com/trollix/ha-tbaro-card`
 3. Select **Lovelace** as category
