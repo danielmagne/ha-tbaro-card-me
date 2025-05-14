@@ -20,7 +20,7 @@ Barometric gauge card for Home Assistant — clean, customizable, SVG-based.
 ### Option 1: via HACS (recommended)
 
 1. In Home Assistant, go to **HACS > Frontend > Custom Repositories**
-2. Add your repository: `https://github.com/<your-username>/ha-tbaro-card`
+2. Add your repository: `https://github.com/trollix/ha-tbaro-card`
 3. Select **Lovelace** as category
 4. Click **Install** on `ha-tbaro-card`
 
@@ -72,14 +72,44 @@ Translations are stored in `locales/`:
 - `locales/en.json`
 - `locales/fr.json`
 
-Auto-selected based on Home Assistant UI language.
+By default, the card uses the current Home Assistant UI language.
+You can override it explicitly using the `language` option:
+
+```yaml
+language: fr  # or enyaml
+type: custom:ha-tbaro-card
+entity: sensor.pessac_pressure
+language: fr  # or en
+```
 
 ---
+
+## Preview
+
+### Card (en)
+
+#### Baro-en
+
+![HA-TBARO-CARD](https://github.com/trollix/ha-tbaro-card/blob/main/img_tbaro_en.png?raw=true "Ha TBaro Card")
+
+#### Form-en
+
+![HA-TBARO-CARD](https://github.com/trollix/ha-tbaro-card/blob/main/img_form_border_en.png?raw=true "Ha TBaro Card")
+
+### Card (fr)
+
+#### Baro-fr
+
+![HA-TBARO-CARD](https://github.com/trollix/ha-tbaro-card/blob/main/img_tbaro_fr.png?raw=true "Ha TBaro Card")
+
+#### form-fr
+
+![HA-TBARO-CARD](https://github.com/trollix/ha-tbaro-card/blob/main/img_form_border_fr.png?raw=true "Ha TBaro Card")
 
 ## 🛠️ Dev
 
 ```bash
-git clone https://github.com/<your-username>/ha-tbaro-card.git
+git clone https://github.com/trollix/ha-tbaro-card.git
 cd ha-tbaro-card
 npm install
 npm run build
@@ -89,4 +119,4 @@ npm run build
 
 ## 🧾 License
 
-MIT — by [@your-username](https://github.com/your-username)
+MIT — by [@trollix](https://github.com/your-username)
