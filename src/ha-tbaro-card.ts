@@ -67,7 +67,7 @@ export class HaTbaroCard extends LitElement {
     if (!config.entity) throw new Error("Entity is required");
 
     const lang = config.language || this.hass?.locale?.language || 'en';
-    this._translations = HaTbaroCard._localeMap[lang] || HaTbaroCard._localeMap['en'];
+    this._translations = {};
 
     this.config = {
       needle_color: '#000',
@@ -219,7 +219,12 @@ export class HaTbaroCard extends LitElement {
     const borderRadius = r + stroke_width / 2 + 0.5;   
     const borderArc = svg`<path d="${this.describeArc(cx, cy, borderRadius, startAngle, endAngle)}" stroke="#000" stroke-width="1" fill="none" />`;
 
-
+    // gestiopn de la locale
+    const lang = this.config.language || this.hass?.locale?.language || 'en';
+    if (!Object.keys(this._translations).length || !this._translations[lang]) {
+      this._translations = HaTbaroCard._localeMap[lang] || HaTbaroCard._localeMap['en'];
+    }
+    
 // à ajouter avant ${arcs} si on veut un border 1px autour de la gauge:
 // <circle cx="${cx}" cy="${cy}" r="${r + stroke_width / 2}" fill="none" stroke="#000" stroke-width="1" />
 
