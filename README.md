@@ -1,8 +1,13 @@
 # ha-tbaro-card
 
+![TBaro Card](https://img.shields.io/github/v/release/trollix/ha-tbaro-card)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
+[![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg?style=flat)](https://github.com/custom-components/hacs)
+
 Barometric gauge card for Home Assistant — clean, customizable, SVG-based.
 
-![preview](https://user-images.githubusercontent.com/your-preview-image.png)
+![preview](https://github.com/trollix/ha-tbaro-card/blob/main/img_tbaro_en.png?raw=true)
 
 ## ✨ Features
 
