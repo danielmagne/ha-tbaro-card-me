@@ -1,6 +1,5 @@
 {
     "name": "ha-tbaro-card",
-    "keywords": ["barometer", "gauge", "weather", "svg"],
     "render_readme": true,
     "content_in_root": false,
     "filename": "dist/ha-tbaro-card.js"
