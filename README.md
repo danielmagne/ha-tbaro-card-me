@@ -49,11 +49,21 @@ resources:
 
 ---
 
+## ⚙️ Options
+
+### `angle`
+
+- `270` (default): Fer à cheval (135° à 405°)
+- `180` : Demi-cercle (180° à 360°)
+
+---
+
 ## 🧪 Usage Example
 
 ```yaml
 type: custom:ha-tbaro-card
 entity: sensor.pessac_pressure
+angle: 180  # or 270 (default)
 show_icon: true
 show_border: true
 stroke_width: 20
