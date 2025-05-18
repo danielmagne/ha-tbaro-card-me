@@ -172,42 +172,51 @@ export class HaTbaroCard extends LitElement {
 
   render() {
     const pressure = this.pressure;
-    const { needle_color, tick_color, size, segments } = this.config;
-    const stroke_width = this.config.stroke_width ?? 20;
-    const { show_border = false } = this.config;
+  const {
+    needle_color,
+    tick_color,
+    size,
+    segments,
+    angle: gaugeAngle = 270,  // ← ici l’angle
+    show_border = false,
+  } = this.config;
 
+    const stroke_width = this.config.stroke_width ?? 20;
     const cx = 150, cy = 150, r = 110;
     const minP = 950, maxP = 1050;
-    const angle = Math.PI * 0.75 + ((pressure - minP) / (maxP - minP)) * (Math.PI * 1.5);
 
-    const gaugeAngle = this.config.angle ?? 270;
-    const startAngle = gaugeAngle === 180 ? Math.PI : Math.PI * 0.75;  // 180° = 180°, 270° = 135°
-    const endAngle = gaugeAngle === 180 ? Math.PI * 2 : Math.PI * 2.25; // 180° = 360°, 270° = 405°
+  // Gestion de l'angle dynamique
+  const startAngle = gaugeAngle === 180 ? Math.PI : Math.PI * 0.75;
+  const endAngle = gaugeAngle === 180 ? Math.PI * 2 : Math.PI * 2.25;
+  const valueAngle = startAngle + ((pressure - minP) / (maxP - minP)) * (endAngle - startAngle);
 
+  // Arcs colorés
+  const arcs = segments!.map(seg => {
+    const aStart = startAngle + ((seg.from - minP) / (maxP - minP)) * (endAngle - startAngle);
+    const aEnd = startAngle + ((seg.to - minP) / (maxP - minP)) * (endAngle - startAngle);
+    return svg`<path d="${this.describeArc(cx, cy, r, aStart, aEnd)}" stroke="${seg.color}" stroke-width="${stroke_width}" fill="none" />`;
+  });
 
-    const arcs = segments!.map(seg => {
-      const aStart = startAngle + ((seg.from - minP) / (maxP - minP)) * Math.PI * 1.5;
-      const aEnd = startAngle + ((seg.to - minP) / (maxP - minP)) * Math.PI * 1.5;
-      return svg`<path d="${this.describeArc(cx, cy, r, aStart, aEnd)}" stroke="${seg.color}" stroke-width="${stroke_width}" fill="none" />`;
-    });
+  // Ticks
+  const ticks = Array.from({ length: 11 }, (_, i) => 950 + i * 10).map(p => {
+    const a = startAngle + ((p - minP) / (maxP - minP)) * (endAngle - startAngle);
+    const p1 = this.polar(cx, cy, r + 16, a);
+    const p2 = this.polar(cx, cy, r - 24, a);
+    return svg`<line x1="${p1.x}" y1="${p1.y}" x2="${p2.x}" y2="${p2.y}" stroke="${tick_color}" stroke-width="2" />`;
+  });
 
-    const ticks = Array.from({ length: 11 }, (_, i) => 950 + i * 10).map(p => {
-      const a = startAngle + ((p - minP) / (maxP - minP)) * Math.PI * 1.5;
-      const p1 = this.polar(cx, cy, r + 16, a);
-      const p2 = this.polar(cx, cy, r - 24, a);
-      return svg`<line x1="${p1.x}" y1="${p1.y}" x2="${p2.x}" y2="${p2.y}" stroke="${tick_color}" stroke-width="2" />`;
-    });
+  // Labels
+  const labels = [960, 980, 1000, 1020, 1040].map(p => {
+    const a = startAngle + ((p - minP) / (maxP - minP)) * (endAngle - startAngle);
+    const pt = this.polar(cx, cy, r - 36, a);
+    return svg`<text x="${pt.x}" y="${pt.y}" font-size="0.9em" font-weight="bolder" class="label">${p}</text>`;
+  });
 
-    const labels = [960, 980, 1000, 1020, 1040].map(p => {
-      const a = startAngle + ((p - minP) / (maxP - minP)) * Math.PI * 1.5;
-      const pt = this.polar(cx, cy, r - 36, a);
-      return svg`<text x="${pt.x}" y="${pt.y}" font-size="0.9em" font-weight="bolder" class="label">${p}</text>`;
-    });
-
-    const needle = (() => {
-      const tip = this.polar(cx, cy, r - 35, angle);
-      const base = this.polar(cx, cy, 16, angle);
-      const sideAngle = angle + Math.PI / 2;
+  // Aiguille
+  const needle = (() => {
+    const tip = this.polar(cx, cy, r - 35, valueAngle);
+    const base = this.polar(cx, cy, 16, valueAngle);
+    const sideAngle = valueAngle + Math.PI / 2;
       const offset = 5;
       const baseL = { x: base.x + Math.cos(sideAngle) * offset, y: base.y + Math.sin(sideAngle) * offset };
       const baseR = { x: base.x - Math.cos(sideAngle) * offset, y: base.y - Math.sin(sideAngle) * offset };
@@ -221,7 +230,7 @@ export class HaTbaroCard extends LitElement {
     const label = this._translations[weather.key] || weather.key;
 
     // début création border fer à cheval
-    const borderRadius = r + stroke_width / 2 + 0.5;   
+    const borderRadius = r + stroke_width / 2 + 0.5;
     const borderArc = svg`<path d="${this.describeArc(cx, cy, borderRadius, startAngle, endAngle)}" stroke="#000" stroke-width="1" fill="none" />`;
 
     // gestiopn de la locale
@@ -229,7 +238,7 @@ export class HaTbaroCard extends LitElement {
     if (!Object.keys(this._translations).length || !this._translations[lang]) {
       this._translations = HaTbaroCard._localeMap[lang] || HaTbaroCard._localeMap['en'];
     }
-    
+
 // à ajouter avant ${arcs} si on veut un border 1px autour de la gauge:
 // <circle cx="${cx}" cy="${cy}" r="${r + stroke_width / 2}" fill="none" stroke="#000" stroke-width="1" />
 
@@ -245,7 +254,6 @@ export class HaTbaroCard extends LitElement {
           <text x="${cx}" y="${cy + 60}" font-size="14" class="label">${label}</text>
           <text x="${cx}" y="${cy + 85}" font-size="22" font-weight="bold" class="label">${pressure.toFixed(1)} hPa</text>
         </svg>`}
-
       </ha-card>
     `;
     //  si on veut afficher une image en HTML: ${show_icon ? this.getIcon(weather.icon) : nothing}
