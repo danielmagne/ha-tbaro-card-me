@@ -184,8 +184,6 @@ render() {
   const stroke_width = this.config.stroke_width ?? 20;
   const cx = 150, r = 110;
   const cy = gaugeAngle === 180 ? 180 : 150;
-  const cy_needle = gaugeAngle === 180 ? cy + 30 : cy;
-
   const minP = 950, maxP = 1050;
 
   // Gestion de l'angle dynamique
@@ -198,7 +196,7 @@ render() {
   const iconYOffset = gaugeAngle === 180 ? -90 : 0;
   const iconX = cx - 25;
   const iconY = (gaugeAngle === 180 ? cy+12 : cy+5 ) + iconYOffset;
-  const labelY = (gaugeAngle === 180 ? cy - 25 : cy + 60);
+  const labelY = (gaugeAngle === 180 ? cy - 35 : cy + 60);
   const pressureY = (gaugeAngle === 180 ? cy + 0 : cy + 85);
 
 
@@ -231,8 +229,8 @@ render() {
     const baseLength = gaugeAngle === 180 ? 30 : 16;
   
     const verticalOffset = gaugeAngle === 180 ? -60 : 0;
-    const tip = this.polar(cx, cy_needle, needleLength, valueAngle);
-    const base = this.polar(cx, cy_needle, baseLength, valueAngle);
+    const tip = this.polar(cx, cy + verticalOffset, needleLength, valueAngle);
+    const base = this.polar(cx, cy + verticalOffset, baseLength, valueAngle);
 
     const centralDot = gaugeAngle === 180 ? nothing : svg`<circle cx="${cx}" cy="${cy}" r="10" fill="${tick_color}" />`;
 
