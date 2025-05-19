@@ -228,9 +228,9 @@ render() {
     const needleLength = gaugeAngle === 180 ? r - 60 : r - 35;
     const baseLength = gaugeAngle === 180 ? 30 : 16;
   
-    const verticalOffset = gaugeAngle === 180 ? -60 : 0;
-    const tip = this.polar(cx, cy + verticalOffset, needleLength, valueAngle);
-    const base = this.polar(cx, cy + verticalOffset, baseLength, valueAngle);
+    const cy_needle = gaugeAngle === 180 ? cy + r : cy;
+    const tip = this.polar(cx, cy_needle, needleLength, valueAngle);
+    const base = this.polar(cx, cy_needle, baseLength, valueAngle);
 
     const centralDot = gaugeAngle === 180 ? nothing : svg`<circle cx="${cx}" cy="${cy}" r="10" fill="${tick_color}" />`;
 
