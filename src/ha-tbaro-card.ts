@@ -191,7 +191,7 @@ render() {
   const valueAngle = startAngle + ((pressure - minP) / (maxP - minP)) * (endAngle - startAngle);
 
   // Position dynamique des éléments verticaux
-  const weatherYOffset = gaugeAngle === 180 ? -60 : 0;
+  const weatherYOffset = gaugeAngle === 180 ? -90 : 0;
   const iconX = cx - 25;
   const iconY = (gaugeAngle === 180 ? cy : cy + 30) + weatherYOffset;
   const labelY = (gaugeAngle === 180 ? cy + 40 : cy + 60) + weatherYOffset;
