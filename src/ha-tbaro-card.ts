@@ -170,8 +170,8 @@ export class HaTbaroCard extends LitElement {
     return { key: "sun", icon: "sun" };
   }
 
-  render() {
-    const pressure = this.pressure;
+render() {
+  const pressure = this.pressure;
   const {
     needle_color,
     tick_color,
@@ -181,16 +181,21 @@ export class HaTbaroCard extends LitElement {
     show_border = false,
   } = this.config;
 
-    const stroke_width = this.config.stroke_width ?? 20;
-    const cx = 150, cy = 150, r = 110;
-    const minP = 950, maxP = 1050;
+  const stroke_width = this.config.stroke_width ?? 20;
+  const cx = 150, cy = 150, r = 110;
+  const minP = 950, maxP = 1050;
 
   // Gestion de l'angle dynamique
   const startAngle = gaugeAngle === 180 ? Math.PI : Math.PI * 0.75;
   const endAngle = gaugeAngle === 180 ? Math.PI * 2 : Math.PI * 2.25;
   const valueAngle = startAngle + ((pressure - minP) / (maxP - minP)) * (endAngle - startAngle);
 
-  // Arcs colorés
+  // Position dynamique des éléments verticaux
+  const iconY = gaugeAngle === 180 ? 140 : 155;
+  const labelY = gaugeAngle === 180 ? cy + 50 : cy + 60;
+  const pressureY = gaugeAngle === 180 ? cy + 70 : cy + 85;
+
+   // Arcs colorés
   const arcs = segments!.map(seg => {
     const aStart = startAngle + ((seg.from - minP) / (maxP - minP)) * (endAngle - startAngle);
     const aEnd = startAngle + ((seg.to - minP) / (maxP - minP)) * (endAngle - startAngle);
@@ -217,21 +222,13 @@ export class HaTbaroCard extends LitElement {
     const tip = this.polar(cx, cy, r - 35, valueAngle);
     const base = this.polar(cx, cy, 16, valueAngle);
     const sideAngle = valueAngle + Math.PI / 2;
-      const offset = 5;
-      const baseL = { x: base.x + Math.cos(sideAngle) * offset, y: base.y + Math.sin(sideAngle) * offset };
-      const baseR = { x: base.x - Math.cos(sideAngle) * offset, y: base.y - Math.sin(sideAngle) * offset };
-      return svg`
-        <polygon points="${tip.x},${tip.y} ${baseL.x},${baseL.y} ${baseR.x},${baseR.y}" fill="${needle_color}" />
-        <circle cx="${cx}" cy="${cy}" r="10" fill="${tick_color}" />`;
-    })();
-
-    //const label = pressure > 1020 ? 'Soleil radieux' : pressure < 980 ? 'Tempête' : pressure < 1000 ? 'Pluie probable' : 'Ciel dégagé';
-    const weather = this.getWeatherInfo(pressure);
-    const label = this._translations[weather.key] || weather.key;
-
-    // début création border fer à cheval
-    const borderRadius = r + stroke_width / 2 + 0.5;
-    const borderArc = svg`<path d="${this.describeArc(cx, cy, borderRadius, startAngle, endAngle)}" stroke="#000" stroke-width="1" fill="none" />`;
+    const offset = 5;
+    const baseL = { x: base.x + Math.cos(sideAngle) * offset, y: base.y + Math.sin(sideAngle) * offset };
+    const baseR = { x: base.x - Math.cos(sideAngle) * offset, y: base.y - Math.sin(sideAngle) * offset };
+    return svg`
+      <polygon points="${tip.x},${tip.y} ${baseL.x},${baseL.y} ${baseR.x},${baseR.y}" fill="${needle_color}" />
+      <circle cx="${cx}" cy="${cy}" r="10" fill="${tick_color}" />`;
+  })();
 
     // gestiopn de la locale
     const lang = this.config.language || this.hass?.locale?.language || 'en';
@@ -242,20 +239,27 @@ export class HaTbaroCard extends LitElement {
 // à ajouter avant ${arcs} si on veut un border 1px autour de la gauge:
 // <circle cx="${cx}" cy="${cy}" r="${r + stroke_width / 2}" fill="none" stroke="#000" stroke-width="1" />
 
-    return html`
-      <ha-card style="box-shadow:none;background:transparent;border:none;border-radius:0;">
-        ${svg`<svg viewBox="0 0 300 300" style="max-width:${size}px;height:auto">  
-          ${show_border ? borderArc : nothing}
-          ${arcs}
-          ${ticks}
-          ${labels}
-          ${needle}
-          <image href="${this.getIconDataUrl(weather.icon)}" x="120" y="155" width="50" height="50" />
-          <text x="${cx}" y="${cy + 60}" font-size="14" class="label">${label}</text>
-          <text x="${cx}" y="${cy + 85}" font-size="22" font-weight="bold" class="label">${pressure.toFixed(1)} hPa</text>
-        </svg>`}
-      </ha-card>
-    `;
+    //const label = pressure > 1020 ? 'Soleil radieux' : pressure < 980 ? 'Tempête' : pressure < 1000 ? 'Pluie probable' : 'Ciel dégagé';
+    const weather = this.getWeatherInfo(pressure);
+    const label = this._translations[weather.key] || weather.key;
+
+    // début création border fer à cheval
+    const borderRadius = r + stroke_width / 2 + 0.5;
+    const borderArc = svg`<path d="${this.describeArc(cx, cy, borderRadius, startAngle, endAngle)}" stroke="#000" stroke-width="1" fill="none" />`;
+  return html`
+    <ha-card style="box-shadow:none;background:transparent;border:none;border-radius:0;">
+      ${svg`<svg viewBox="0 0 300 300" style="max-width:${size}px;height:auto">
+        ${show_border ? borderArc : nothing}
+        ${arcs}
+        ${ticks}
+        ${labels}
+        ${needle}
+        <image href="${this.getIconDataUrl(weather.icon)}" x="120" y="${iconY}" width="50" height="50" />
+        <text x="${cx}" y="${labelY}" font-size="14" class="label">${label}</text>
+        <text x="${cx}" y="${pressureY}" font-size="22" font-weight="bold" class="label">${pressure.toFixed(1)} hPa</text>
+      </svg>`}
+    </ha-card>
+  `;
     //  si on veut afficher une image en HTML: ${show_icon ? this.getIcon(weather.icon) : nothing}
     // mais il faut le faire hors du svg.
   }
