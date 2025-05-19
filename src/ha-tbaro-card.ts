@@ -182,7 +182,8 @@ render() {
   } = this.config;
 
   const stroke_width = this.config.stroke_width ?? 20;
-  const cx = 150, cy = 150, r = 110;
+  const cx = 150, r = 110;
+  const cy = gaugeAngle === 180 ? 180 : 150;
   const minP = 950, maxP = 1050;
 
   // Gestion de l'angle dynamique
@@ -192,12 +193,14 @@ render() {
 
   // Position dynamique des éléments verticaux
   const weatherYOffset = gaugeAngle === 180 ? -90 : 0;
+  const iconYOffset = gaugeAngle === 180 ? -90 : 0;
   const iconX = cx - 25;
-  const iconY = (gaugeAngle === 180 ? cy : cy + 30) + weatherYOffset;
-  const labelY = (gaugeAngle === 180 ? cy + 40 : cy + 60) + weatherYOffset;
-  const pressureY = (gaugeAngle === 180 ? cy + 60 : cy + 85) + weatherYOffset;
+  const iconY = (gaugeAngle === 180 ? cy : cy + 30) + iconYOffset;
+  const labelY = (gaugeAngle === 180 ? cy + 40 : cy + 60);
+  const pressureY = (gaugeAngle === 180 ? cy + 60 : cy + 85);
 
-   // Arcs colorés
+
+  // Arcs colorés
   const arcs = segments!.map(seg => {
     const aStart = startAngle + ((seg.from - minP) / (maxP - minP)) * (endAngle - startAngle);
     const aEnd = startAngle + ((seg.to - minP) / (maxP - minP)) * (endAngle - startAngle);
