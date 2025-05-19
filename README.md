@@ -1,5 +1,7 @@
 # ha-tbaro-card
 
+Barometric gauge card for Home Assistant — clean, customizable, SVG-based.
+
 ![TBaro Card](https://img.shields.io/github/v/release/trollix/ha-tbaro-card)
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/trollix/ha-tbaro-card)](https://github.com/trollix/ha-tbaro-card/releases)
 ![GitHub Release Date](https://img.shields.io/github/release-date/trollix/ha-tbaro-card)
@@ -53,8 +55,15 @@ resources:
 
 ### `angle`
 
-- `270` (default): Fer à cheval (135° à 405°)
-- `180` : Demi-cercle (180° à 360°)
+- `270` (par défaut) : Affichage en fer à cheval (135° à 405°)
+- `180` : Affichage en demi-cercle (180° à 360°)
+
+L’option `angle: 180` adapte dynamiquement :
+
+- la position et la taille de l’aiguille (plus courte, recentrée)
+- la suppression du point central
+- le recentrage de l’icône météo au cœur de la gauge
+- la disposition des textes et étiquettes
 
 ---
 
