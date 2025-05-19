@@ -191,10 +191,11 @@ render() {
   const valueAngle = startAngle + ((pressure - minP) / (maxP - minP)) * (endAngle - startAngle);
 
   // Position dynamique des éléments verticaux
-  const iconY = gaugeAngle === 180 ? cy - 20 : cy + 30;
+  const weatherYOffset = gaugeAngle === 180 ? -60 : 0;
   const iconX = cx - 25;
-  const labelY = gaugeAngle === 180 ? cy + 35 : cy + 60;
-  const pressureY = gaugeAngle === 180 ? cy + 55 : cy + 85;
+  const iconY = (gaugeAngle === 180 ? cy : cy + 30) + weatherYOffset;
+  const labelY = (gaugeAngle === 180 ? cy + 40 : cy + 60) + weatherYOffset;
+  const pressureY = (gaugeAngle === 180 ? cy + 60 : cy + 85) + weatherYOffset;
 
    // Arcs colorés
   const arcs = segments!.map(seg => {
@@ -223,8 +224,10 @@ render() {
 
     const needleLength = gaugeAngle === 180 ? r - 60 : r - 35;
     const baseLength = gaugeAngle === 180 ? 30 : 16;
-    const tip = this.polar(cx, cy, r - 35, valueAngle);
-    const base = this.polar(cx, cy, 16, valueAngle);
+  
+    const verticalOffset = gaugeAngle === 180 ? -60 : 0;
+    const tip = this.polar(cx, cy + verticalOffset, needleLength, valueAngle);
+    const base = this.polar(cx, cy + verticalOffset, baseLength, valueAngle);
 
     const centralDot = gaugeAngle === 180 ? nothing : svg`<circle cx="${cx}" cy="${cy}" r="10" fill="${tick_color}" />`;
 
