@@ -191,9 +191,10 @@ render() {
   const valueAngle = startAngle + ((pressure - minP) / (maxP - minP)) * (endAngle - startAngle);
 
   // Position dynamique des éléments verticaux
-  const iconY = gaugeAngle === 180 ? 140 : 155;
-  const labelY = gaugeAngle === 180 ? cy + 50 : cy + 60;
-  const pressureY = gaugeAngle === 180 ? cy + 70 : cy + 85;
+  const iconY = gaugeAngle === 180 ? cy - 20 : cy + 30;
+  const iconX = cx - 25;
+  const labelY = gaugeAngle === 180 ? cy + 35 : cy + 60;
+  const pressureY = gaugeAngle === 180 ? cy + 55 : cy + 85;
 
    // Arcs colorés
   const arcs = segments!.map(seg => {
@@ -219,15 +220,20 @@ render() {
 
   // Aiguille
   const needle = (() => {
+
+    const needleLength = gaugeAngle === 180 ? r - 60 : r - 35;
+    const baseLength = gaugeAngle === 180 ? 30 : 16;
     const tip = this.polar(cx, cy, r - 35, valueAngle);
     const base = this.polar(cx, cy, 16, valueAngle);
+
     const sideAngle = valueAngle + Math.PI / 2;
     const offset = 5;
     const baseL = { x: base.x + Math.cos(sideAngle) * offset, y: base.y + Math.sin(sideAngle) * offset };
     const baseR = { x: base.x - Math.cos(sideAngle) * offset, y: base.y - Math.sin(sideAngle) * offset };
     return svg`
       <polygon points="${tip.x},${tip.y} ${baseL.x},${baseL.y} ${baseR.x},${baseR.y}" fill="${needle_color}" />
-      <circle cx="${cx}" cy="${cy}" r="10" fill="${tick_color}" />`;
+      ${gaugeAngle === 180 ? nothing : svg`<circle cx="${cx}" cy="${cy}" r="10" fill="${tick_color}" />`}
+      `;
   })();
 
     // gestiopn de la locale
@@ -254,7 +260,7 @@ render() {
         ${ticks}
         ${labels}
         ${needle}
-        <image href="${this.getIconDataUrl(weather.icon)}" x="120" y="${iconY}" width="50" height="50" />
+        <image href="${this.getIconDataUrl(weather.icon)}" x="${iconX}" y="${iconY}" width="50" height="50" />
         <text x="${cx}" y="${labelY}" font-size="14" class="label">${label}</text>
         <text x="${cx}" y="${pressureY}" font-size="22" font-weight="bold" class="label">${pressure.toFixed(1)} hPa</text>
       </svg>`}
