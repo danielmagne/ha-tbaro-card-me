@@ -225,12 +225,18 @@ render() {
   // Aiguille
   const needle = (() => {
 
-    const needleLength = gaugeAngle === 180 ? r - 60 : r - 35;
-    const baseLength = gaugeAngle === 180 ? 30 : 16;
+    //const needleLength = gaugeAngle === 180 ? r - 60 : r - 35;
+    //const baseLength = gaugeAngle === 180 ? 30 : 16;
   
-    const cy_needle =  cy;
-    const tip = this.polar(cx, cy_needle, needleLength, valueAngle);
-    const base = this.polar(cx, cy_needle, baseLength, valueAngle);
+    //const cy_needle =  cy;
+    //const tip = this.polar(cx, cy_needle, needleLength, valueAngle);
+    //const base = this.polar(cx, cy_needle, baseLength, valueAngle);
+
+    const needleLength = gaugeAngle === 180 ? r - 20 : r - 35;
+    const baseLength = gaugeAngle === 180 ? 30 : 16;
+    const tip = this.polar(cx, cy, needleLength, valueAngle);
+    const base = this.polar(cx, cy, baseLength, valueAngle);
+
 
     const centralDot = gaugeAngle === 180 ? nothing : svg`<circle cx="${cx}" cy="${cy}" r="10" fill="${tick_color}" />`;
 
