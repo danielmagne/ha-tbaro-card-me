@@ -183,7 +183,7 @@ render() {
 
   const stroke_width = this.config.stroke_width ?? 20;
   const cx = 150, r = 110;
-  const cy = gaugeAngle === 180 ? 180 : 150;
+  const cy = gaugeAngle === 180 ? 150 : 150;
   const minP = 950, maxP = 1050;
 
   // Gestion de l'angle dynamique
@@ -228,7 +228,7 @@ render() {
     const needleLength = gaugeAngle === 180 ? r - 60 : r - 35;
     const baseLength = gaugeAngle === 180 ? 30 : 16;
   
-    const cy_needle = gaugeAngle === 180 ? cy + r : cy;
+    const cy_needle =  cy;
     const tip = this.polar(cx, cy_needle, needleLength, valueAngle);
     const base = this.polar(cx, cy_needle, baseLength, valueAngle);
 
