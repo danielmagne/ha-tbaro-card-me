@@ -241,7 +241,7 @@ render() {
     const centralDot = gaugeAngle === 180 ? nothing : svg`<circle cx="${cx}" cy="${cy}" r="10" fill="${tick_color}" />`;
 
     const sideAngle = valueAngle + Math.PI / 2;
-    const offset = gaugeAngle === 180 ? 8 : 5; // grossuer de l'aiguille
+    const offset = gaugeAngle === 180 ? 7 : 5; // grosseur de l'aiguille
     const baseL = { x: base.x + Math.cos(sideAngle) * offset, y: base.y + Math.sin(sideAngle) * offset };
     const baseR = { x: base.x - Math.cos(sideAngle) * offset, y: base.y - Math.sin(sideAngle) * offset };
     return svg`
