@@ -195,8 +195,8 @@ render() {
   const weatherYOffset = gaugeAngle === 180 ? -90 : 0;
   const iconYOffset = gaugeAngle === 180 ? -90 : 0;
   const iconX = cx - 25;
-  const iconY = (gaugeAngle === 180 ? cy : cy+5 ) + iconYOffset;
-  const labelY = (gaugeAngle === 180 ? cy + 40 : cy + 60);
+  const iconY = (gaugeAngle === 180 ? cy+10 : cy+5 ) + iconYOffset;
+  const labelY = (gaugeAngle === 180 ? cy + 0 : cy + 60);
   const pressureY = (gaugeAngle === 180 ? cy + 60 : cy + 85);
 
 
