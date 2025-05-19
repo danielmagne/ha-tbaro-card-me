@@ -233,7 +233,7 @@ render() {
     //const base = this.polar(cx, cy_needle, baseLength, valueAngle);
 
     const needleLength = gaugeAngle === 180 ? r +5 : r - 35;
-    const baseLength = gaugeAngle === 180 ? 60 : 16;
+    const baseLength = gaugeAngle === 180 ? 80 : 16;
     const tip = this.polar(cx, cy, needleLength, valueAngle);
     const base = this.polar(cx, cy, baseLength, valueAngle);
 
