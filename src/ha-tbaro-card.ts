@@ -196,7 +196,7 @@ render() {
   const iconYOffset = gaugeAngle === 180 ? -90 : 0;
   const iconX = cx - 25;
   const iconY = (gaugeAngle === 180 ? cy+12 : cy+5 ) + iconYOffset;
-  const labelY = (gaugeAngle === 180 ? cy - 35 : cy + 60);
+  const labelY = (gaugeAngle === 180 ? cy - 25 : cy + 60);
   const pressureY = (gaugeAngle === 180 ? cy + 0 : cy + 85);
 
 
