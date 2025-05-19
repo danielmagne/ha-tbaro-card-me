@@ -226,13 +226,15 @@ render() {
     const tip = this.polar(cx, cy, r - 35, valueAngle);
     const base = this.polar(cx, cy, 16, valueAngle);
 
+    const centralDot = gaugeAngle === 180 ? nothing : svg`<circle cx="${cx}" cy="${cy}" r="10" fill="${tick_color}" />`;
+
     const sideAngle = valueAngle + Math.PI / 2;
     const offset = 5;
     const baseL = { x: base.x + Math.cos(sideAngle) * offset, y: base.y + Math.sin(sideAngle) * offset };
     const baseR = { x: base.x - Math.cos(sideAngle) * offset, y: base.y - Math.sin(sideAngle) * offset };
     return svg`
       <polygon points="${tip.x},${tip.y} ${baseL.x},${baseL.y} ${baseR.x},${baseR.y}" fill="${needle_color}" />
-      ${gaugeAngle === 180 ? nothing : svg`<circle cx="${cx}" cy="${cy}" r="10" fill="${tick_color}" />`}
+      ${centralDot}
       `;
   })();
 
