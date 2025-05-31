@@ -83,14 +83,43 @@ export class HaTbaroCard extends LitElement {
   }
 
   private static HPA_TO_MMHG = 0.75006156;
+ 
+  /** multiplicateur pour aller DE la valeur brute VERS hPa */
+  private static readonly UNIT_TO_HPA: Record<string, number> = {
+    hPa:   1,
+    mbar:  1,
+    Pa:    0.01,
+    kPa:   10,
+    bar:   1000,
+    inHg:  33.8638866667,
+    mmHg:  1.333223684,
+  };
 
-  get pressure(): number {
+  private get rawHpa(): number {
+    const stateObj = this.hass.states[this.config.entity];
+    const value    = stateObj ? parseFloat(stateObj.state) : 1013.25;
+    const unitRaw  = (stateObj?.attributes?.unit_of_measurement || 'hPa').trim();
+
+    const factor = HaTbaroCard.UNIT_TO_HPA[unitRaw] ?? 1; // défaut = déjà hPa
+    return value * factor;
+  }
+
+
+  get pressure_old(): number {
     const state = this.hass.states[this.config.entity];
     const rawHpa = state ? parseFloat(state.state) : 1013.25;
     return this.config.unit === 'mmHg'
       ? rawHpa * HaTbaroCard.HPA_TO_MMHG      // conversion visuelle
       : rawHpa;                               // conserve hPa sinon
   }
+
+    get pressure(): number {
+    const hpa = this.rawHpa;
+    return this.config.unit === 'mmHg'
+      ? hpa * 0.75006156           // hPa → mmHg
+      : hpa;                       // hPa à l’écran
+  }
+
 
 
   polar(cx: number, cy: number, r: number, angle: number) {
@@ -159,7 +188,7 @@ export class HaTbaroCard extends LitElement {
     return `data:image/svg+xml,${encodeURIComponent(raw).replace(/'/g, '%27').replace(/"/g, '%22')}`;
   }
 
-  getWeatherInfo(pDisplay: number): { key: string; icon: string } {
+  getWeatherInfo_old(pDisplay: number): { key: string; icon: string } {
     // Ramener la valeur en hPa pour appliquer les seuils
     const hpa = this.config.unit === 'mmHg'
       ? pDisplay / HaTbaroCard.HPA_TO_MMHG
@@ -169,6 +198,13 @@ export class HaTbaroCard extends LitElement {
     if (hpa < 1000) return { key: 'rain',   icon: 'rain'   };
     if (hpa < 1020) return { key: 'partly', icon: 'partly' };
     return               { key: 'sun',    icon: 'sun'    }; 
+  }
+
+  getWeatherInfo(hpa: number): { key: string; icon: string } {
+    if (hpa < 980) return { key: 'storm',  icon: 'storm'  };
+    if (hpa < 1000) return { key: 'rain',   icon: 'rain'   };
+    if (hpa < 1020) return { key: 'partly', icon: 'partly' };
+    return            { key: 'sun',    icon: 'sun'    };
   }
 
 
@@ -193,12 +229,18 @@ render() {
   const startAngle = gaugeAngle === 180 ? Math.PI : Math.PI * 0.75;
   const endAngle = gaugeAngle === 180 ? Math.PI * 2 : Math.PI * 2.25;
 
-  const hpaValue = this.config.unit === 'mmHg'
+  const hpaValue_old = this.config.unit === 'mmHg'
   ? pressure / HaTbaroCard.HPA_TO_MMHG
   : pressure;
 
+  const hpaValue = this.rawHpa; // pour l’angle et getWeatherInfo
   const valueAngle = startAngle
     + ((hpaValue - minP) / (maxP - minP)) * (endAngle - startAngle);
+
+
+
+
+
 
   // Position dynamique des éléments verticaux
   // const weatherYOffset = gaugeAngle === 180 ? -90 : 0;
@@ -216,7 +258,8 @@ render() {
   }
 
   // ——— météo et localisation ———
-  const weather = this.getWeatherInfo(pressure);
+  const weather_old = this.getWeatherInfo(pressure);
+  const weather = this.getWeatherInfo(hpaValue); // passe du hPa pur
   const label = this._translations[weather.key] || weather.key;
 
   // Arcs colorés
