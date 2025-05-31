@@ -24,7 +24,7 @@ interface Segment {
 interface BaroCardConfig {
   entity: string;
   language?: string;
-  unit?: 'hPa' | 'inHg';
+  unit?: 'hPa' | 'mmHg';
   needle_color?: string;
   tick_color?: string;
   show_icon?: boolean;
@@ -82,11 +82,16 @@ export class HaTbaroCard extends LitElement {
     };
   }
 
+  private static HPA_TO_MMHG = 0.75006156;
+
   get pressure(): number {
     const state = this.hass.states[this.config.entity];
-    const raw = state ? parseFloat(state.state) : 1013.25;
-    return this.config.unit === 'inHg' ? raw * 0.02953 : raw;
+    const rawHpa = state ? parseFloat(state.state) : 1013.25;
+    return this.config.unit === 'mmHg'
+      ? rawHpa * HaTbaroCard.HPA_TO_MMHG      // conversion visuelle
+      : rawHpa;                               // conserve hPa sinon
   }
+
 
   polar(cx: number, cy: number, r: number, angle: number) {
     return {
@@ -154,13 +159,20 @@ export class HaTbaroCard extends LitElement {
     return `data:image/svg+xml,${encodeURIComponent(raw).replace(/'/g, '%27').replace(/"/g, '%22')}`;
   }
 
-  getWeatherInfo(p: number): { key: string; icon: string } {
-    const hpa = this.config.unit === 'inHg' ? p / 0.02953 : p;
-    if (hpa < 980) return { key: "storm", icon: "storm" };
-    if (hpa < 1000) return { key: "rain", icon: "rain" };
-    if (hpa < 1020) return { key: "partly", icon: "partly" };
-    return { key: "sun", icon: "sun" };
+  getWeatherInfo(pDisplay: number): { key: string; icon: string } {
+    // Ramener la valeur en hPa pour appliquer les seuils
+    const hpa = this.config.unit === 'mmHg'
+      ? pDisplay / HaTbaroCard.HPA_TO_MMHG
+      : pDisplay;
+
+    if (hpa < 980)  return { key: 'storm',  icon: 'storm'  };
+    if (hpa < 1000) return { key: 'rain',   icon: 'rain'   };
+    if (hpa < 1020) return { key: 'partly', icon: 'partly' };
+    return               { key: 'sun',    icon: 'sun'    }; 
   }
+
+
+
 
 render() {
   const pressure = this.pressure;
@@ -180,9 +192,13 @@ render() {
   // Gestion de l'angle dynamique
   const startAngle = gaugeAngle === 180 ? Math.PI : Math.PI * 0.75;
   const endAngle = gaugeAngle === 180 ? Math.PI * 2 : Math.PI * 2.25;
-    const valueAngle = startAngle + ((this.config.unit === 'inHg'
-      ? pressure / 0.02953
-      : pressure) - minP) / (maxP - minP) * (endAngle - startAngle);
+
+  const hpaValue = this.config.unit === 'mmHg'
+  ? pressure / HaTbaroCard.HPA_TO_MMHG
+  : pressure;
+
+  const valueAngle = startAngle
+    + ((hpaValue - minP) / (maxP - minP)) * (endAngle - startAngle);
 
   // Position dynamique des éléments verticaux
   // const weatherYOffset = gaugeAngle === 180 ? -90 : 0;
@@ -271,7 +287,7 @@ render() {
         <image href="${this.getIconDataUrl(weather.icon)}" x="${iconX}" y="${iconY}" width="50" height="50" />
         <text x="${cx}" y="${labelY}" font-size="14" class="label">${label}</text>
           <text x="${cx}" y="${pressureY}" font-size="22" font-weight="bold" class="label">
-            ${this.config.unit === 'inHg' ? pressure.toFixed(2) + ' inHg' : pressure.toFixed(1) + ' hPa'}
+            ${this.config.unit === 'mmHg' ? pressure.toFixed(1) + ' inHg' : pressure.toFixed(1) + ' hPa'}
           </text>
       </svg>`}
     </ha-card>
