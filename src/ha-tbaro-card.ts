@@ -185,13 +185,17 @@ render() {
       : pressure) - minP) / (maxP - minP) * (endAngle - startAngle);
 
   // Position dynamique des éléments verticaux
-  const weatherYOffset = gaugeAngle === 180 ? -90 : 0;
-  const iconYOffset = gaugeAngle === 180 ? -90 : 0;
+  // const weatherYOffset = gaugeAngle === 180 ? -90 : 0;
+  
   const iconX = cx - 25;
+  const iconYOffset = gaugeAngle === 180 ? -90 : 0;
   const iconY = (gaugeAngle === 180 ? cy+12 : cy+5 ) + iconYOffset;
   const labelY = (gaugeAngle === 180 ? cy - 25 : cy + 60);
   const pressureY = (gaugeAngle === 180 ? cy + 0 : cy + 85);
 
+    // ——— météo et localisation ———
+    const weather = this.getWeatherInfo(pressure);
+    const label = this._translations[weather.key] || weather.key;
 
   // Arcs colorés
   const arcs = segments!.map(seg => {
@@ -250,8 +254,6 @@ render() {
 // <circle cx="${cx}" cy="${cy}" r="${r + stroke_width / 2}" fill="none" stroke="#000" stroke-width="1" />
 
     //const label = pressure > 1020 ? 'Soleil radieux' : pressure < 980 ? 'Tempête' : pressure < 1000 ? 'Pluie probable' : 'Ciel dégagé';
-    const weather = this.getWeatherInfo(pressure);
-    const label = this._translations[weather.key] || weather.key;
 
     // début création border fer à cheval
     const borderRadius = r + stroke_width / 2 + 0.5;
@@ -267,7 +269,9 @@ render() {
         ${needle}
         <image href="${this.getIconDataUrl(weather.icon)}" x="${iconX}" y="${iconY}" width="50" height="50" />
         <text x="${cx}" y="${labelY}" font-size="14" class="label">${label}</text>
-        <text x="${cx}" y="${pressureY}" font-size="22" font-weight="bold" class="label">${pressure.toFixed(1)} hPa</text>
+          <text x="${cx}" y="${pressureY}" font-size="22" font-weight="bold" class="label">
+            ${this.config.unit === 'inHg' ? pressure.toFixed(2) + ' inHg' : pressure.toFixed(1) + ' hPa'}
+          </text>
       </svg>`}
     </ha-card>
   `;
