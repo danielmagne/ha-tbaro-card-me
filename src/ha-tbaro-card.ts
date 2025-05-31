@@ -24,7 +24,7 @@ interface Segment {
 interface BaroCardConfig {
   entity: string;
   language?: string;
-  unit?: 'hPa' | 'mmHg';
+  unit?: 'hpa' | 'mm';
   needle_color?: string;
   tick_color?: string;
   show_icon?: boolean;
@@ -71,7 +71,7 @@ export class HaTbaroCard extends LitElement {
       show_border: false,
       size: 300,
       angle: 270,
-      unit: 'hPa',
+      unit: 'hpa',
       segments: [
         { from: 950, to: 980, color: '#3399ff' },
         { from: 980, to: 1000, color: '#4CAF50' },
@@ -108,14 +108,14 @@ export class HaTbaroCard extends LitElement {
   get pressure_old(): number {
     const state = this.hass.states[this.config.entity];
     const rawHpa = state ? parseFloat(state.state) : 1013.25;
-    return this.config.unit === 'mmHg'
+    return this.config.unit === 'mm'
       ? rawHpa * HaTbaroCard.HPA_TO_MMHG      // conversion visuelle
       : rawHpa;                               // conserve hPa sinon
   }
 
     get pressure(): number {
     const hpa = this.rawHpa;
-    return this.config.unit === 'mmHg'
+    return this.config.unit === 'mm'
       ? hpa * 0.75006156           // hPa → mmHg
       : hpa;                       // hPa à l’écran
   }
@@ -190,7 +190,7 @@ export class HaTbaroCard extends LitElement {
 
   getWeatherInfo_old(pDisplay: number): { key: string; icon: string } {
     // Ramener la valeur en hPa pour appliquer les seuils
-    const hpa = this.config.unit === 'mmHg'
+    const hpa = this.config.unit === 'mm'
       ? pDisplay / HaTbaroCard.HPA_TO_MMHG
       : pDisplay;
 
@@ -229,7 +229,7 @@ render() {
   const startAngle = gaugeAngle === 180 ? Math.PI : Math.PI * 0.75;
   const endAngle = gaugeAngle === 180 ? Math.PI * 2 : Math.PI * 2.25;
 
-  const hpaValue_old = this.config.unit === 'mmHg'
+  const hpaValue_old = this.config.unit === 'mm'
   ? pressure / HaTbaroCard.HPA_TO_MMHG
   : pressure;
 
@@ -301,7 +301,7 @@ render() {
   const labelHpa = [960, 980, 1000, 1020, 1040];
 
   const labels = labelHpa.map(p => {
-    const display = this.config.unit === 'mmHg'
+    const display = this.config.unit === 'mm'
       ? (p * HaTbaroCard.HPA_TO_MMHG).toFixed(0)   // entier mmHg
       : p.toString();                              // hPa brut
 
@@ -358,7 +358,7 @@ render() {
         <image href="${this.getIconDataUrl(weather.icon)}" x="${iconX}" y="${iconY}" width="50" height="50" />
         <text x="${cx}" y="${labelY}" font-size="14" class="label">${label}</text>
           <text x="${cx}" y="${pressureY}" font-size="22" font-weight="bold" class="label">
-            ${this.config.unit === 'mmHg' ? pressure.toFixed(1) + ' mmHg' : pressure.toFixed(1) + ' hPa'}
+            ${this.config.unit === 'mm' ? pressure.toFixed(1) + ' mm' : pressure.toFixed(1) + ' hPa'}
           </text>
       </svg>`}
     </ha-card>
