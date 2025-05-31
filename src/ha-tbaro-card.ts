@@ -1,5 +1,4 @@
 // ha-tbaro-card.ts
-// Contenu complet déjà généré plus tôt, remis ici sous forme de fichier TypeScript dans src/
 
 import { LitElement, html, css, svg, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
@@ -13,7 +12,6 @@ import rainIcon from './icons/rain.svg';
 import partlyIcon from './icons/partly.svg';
 import stormIcon from './icons/storm.svg';
 
-
 import fr from '../locales/fr.json';
 import en from '../locales/en.json';
 
@@ -26,6 +24,7 @@ interface Segment {
 interface BaroCardConfig {
   entity: string;
   language?: string;
+  unit?: 'hPa' | 'inHg';
   needle_color?: string;
   tick_color?: string;
   show_icon?: boolean;
@@ -44,16 +43,10 @@ export class HaTbaroCard extends LitElement {
   private _translations: Record<string, string> = {};
   private static _localeMap: Record<string, Record<string, string>> = { fr, en };
 
-
   static styles = [
     css`
-      :host {
-        display: block;
-      }
-      svg {
-        display: block;
-        margin: auto;
-      }
+      :host { display: block; }
+      svg { display: block; margin: auto; }
       .label {
         text-anchor: middle;
         fill: #000;
@@ -78,6 +71,7 @@ export class HaTbaroCard extends LitElement {
       show_border: false,
       size: 300,
       angle: 270,
+      unit: 'hPa',
       segments: [
         { from: 950, to: 980, color: '#3399ff' },
         { from: 980, to: 1000, color: '#4CAF50' },
@@ -88,10 +82,10 @@ export class HaTbaroCard extends LitElement {
     };
   }
 
-
   get pressure(): number {
     const state = this.hass.states[this.config.entity];
-    return state ? parseFloat(state.state) : 1013.25;
+    const raw = state ? parseFloat(state.state) : 1013.25;
+    return this.config.unit === 'inHg' ? raw * 0.02953 : raw;
   }
 
   polar(cx: number, cy: number, r: number, angle: number) {
@@ -147,7 +141,6 @@ export class HaTbaroCard extends LitElement {
       <img class="weather-img-svg" src="${dataUrl}" loading="lazy" width="32" height="32" style="display:block; margin: -30px auto 5px auto;" />
     `;
   }
-  
 
   getIconDataUrl(id: string): string | undefined {
     const svgMap: Record<string, string> = {
@@ -161,12 +154,11 @@ export class HaTbaroCard extends LitElement {
     return `data:image/svg+xml,${encodeURIComponent(raw).replace(/'/g, '%27').replace(/"/g, '%22')}`;
   }
 
-
-
   getWeatherInfo(p: number): { key: string; icon: string } {
-    if (p < 980) return { key: "storm", icon: "storm" };
-    if (p < 1000) return { key: "rain", icon: "rain" };
-    if (p < 1020) return { key: "partly", icon: "partly" };
+    const hpa = this.config.unit === 'inHg' ? p / 0.02953 : p;
+    if (hpa < 980) return { key: "storm", icon: "storm" };
+    if (hpa < 1000) return { key: "rain", icon: "rain" };
+    if (hpa < 1020) return { key: "partly", icon: "partly" };
     return { key: "sun", icon: "sun" };
   }
 
@@ -181,15 +173,16 @@ render() {
     show_border = false,
   } = this.config;
 
-  const stroke_width = this.config.stroke_width ?? 20;
-  const cx = 150, r = 110;
-  const cy = gaugeAngle === 180 ? 150 : 150;
-  const minP = 950, maxP = 1050;
+    const stroke_width = this.config.stroke_width ?? 20;
+    const cx = 150, r = 110, cy = 150;
+    const minP = 950, maxP = 1050;
 
   // Gestion de l'angle dynamique
   const startAngle = gaugeAngle === 180 ? Math.PI : Math.PI * 0.75;
   const endAngle = gaugeAngle === 180 ? Math.PI * 2 : Math.PI * 2.25;
-  const valueAngle = startAngle + ((pressure - minP) / (maxP - minP)) * (endAngle - startAngle);
+    const valueAngle = startAngle + ((this.config.unit === 'inHg'
+      ? pressure / 0.02953
+      : pressure) - minP) / (maxP - minP) * (endAngle - startAngle);
 
   // Position dynamique des éléments verticaux
   const weatherYOffset = gaugeAngle === 180 ? -90 : 0;
@@ -232,7 +225,7 @@ render() {
     //const tip = this.polar(cx, cy_needle, needleLength, valueAngle);
     //const base = this.polar(cx, cy_needle, baseLength, valueAngle);
 
-    const needleLength = gaugeAngle === 180 ? r -5 : r - 35;
+    const needleLength = gaugeAngle === 180 ? r - 5 : r - 35;
     const baseLength = gaugeAngle === 180 ? 80 : 16;
     const tip = this.polar(cx, cy, needleLength, valueAngle);
     const base = this.polar(cx, cy, baseLength, valueAngle);
@@ -266,6 +259,7 @@ render() {
     // début création border fer à cheval
     const borderRadius = r + stroke_width / 2 + 0.5;
     const borderArc = svg`<path d="${this.describeArc(cx, cy, borderRadius, startAngle, endAngle)}" stroke="#000" stroke-width="1" fill="none" />`;
+
   return html`
     <ha-card style="box-shadow:none;background:transparent;border:none;border-radius:0;">
       ${svg`<svg viewBox="0 0 300 300" style="max-width:${size}px;height:auto">
