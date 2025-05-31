@@ -17,13 +17,14 @@ import en from '../locales/en.json';
 import ru from '../locales/ru.json';
 import es from '../locales/es.json';
 
+// Print Version to Console
 import { version, name } from '../package.json'
-
 export const printVersionToConsole = () => console.info(
     `%c  ${name.toUpperCase()}  %c  Version ${version}  `,
     'color: white; font-weight: bold; background: crimson',
     'color: #000; font-weight: bold; background: #ddd',
 );
+printVersionToConsole();
 
 interface Segment {
   from: number;
