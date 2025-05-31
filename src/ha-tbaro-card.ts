@@ -17,6 +17,14 @@ import en from '../locales/en.json';
 import ru from '../locales/ru.json';
 import es from '../locales/es.json';
 
+import { version, name } from '../package.json'
+
+export const printVersionToConsole = () => console.info(
+    `%c  ${name.toUpperCase()}  %c  Version ${version}  `,
+    'color: white; font-weight: bold; background: crimson',
+    'color: #000; font-weight: bold; background: #ddd',
+);
+
 interface Segment {
   from: number;
   to: number;
@@ -122,16 +130,6 @@ export class HaTbaroCard extends LitElement {
   }
 
 
-
-
-  get pressure_old(): number {
-    const state = this.hass.states[this.config.entity];
-    const rawHpa = state ? parseFloat(state.state) : 1013.25;
-    return this.config.unit === 'mm'
-      ? rawHpa * HaTbaroCard.HPA_TO_MM      // conversion visuelle
-      : rawHpa;                               // conserve hPa sinon
-  }
-
   get pressure(): number {
     return this.config.unit === 'mm'
       ? this.rawHpa * HaTbaroCard.HPA_TO_MM      // hPa → mm
@@ -205,18 +203,6 @@ export class HaTbaroCard extends LitElement {
     return `data:image/svg+xml,${encodeURIComponent(raw).replace(/'/g, '%27').replace(/"/g, '%22')}`;
   }
 
-  getWeatherInfo_old(pDisplay: number): { key: string; icon: string } {
-    // Ramener la valeur en hPa pour appliquer les seuils
-    const hpa = this.config.unit === 'mm'
-      ? pDisplay / HaTbaroCard.HPA_TO_MM
-      : pDisplay;
-
-    if (hpa < 980)  return { key: 'storm',  icon: 'storm'  };
-    if (hpa < 1000) return { key: 'rain',   icon: 'rain'   };
-    if (hpa < 1020) return { key: 'partly', icon: 'partly' };
-    return               { key: 'sun',    icon: 'sun'    }; 
-  }
-
   private getWeatherInfo(): { key: string; icon: string } {
     const hpa = this.rawHpa;                    // seuils fixes
     if (hpa < 980)  return { key: 'storm',  icon: 'storm'  };
@@ -229,6 +215,9 @@ export class HaTbaroCard extends LitElement {
 
 
 render() {
+
+  if (!this.config) return html``;
+
   const pressure = this.pressure;
   const {
     needle_color,
@@ -246,10 +235,6 @@ render() {
   // Gestion de l'angle dynamique
   const startAngle = gaugeAngle === 180 ? Math.PI : Math.PI * 0.75;
   const endAngle = gaugeAngle === 180 ? Math.PI * 2 : Math.PI * 2.25;
-
-  const hpaValue_old = this.config.unit === 'mm'
-  ? pressure / HaTbaroCard.HPA_TO_MM
-  : pressure;
 
   const hpaValue = this.rawHpa; // pour l’angle et getWeatherInfo
   const valueAngle = startAngle
@@ -276,7 +261,6 @@ render() {
   }
 
   // ——— météo et localisation ———
-  const weather_old = this.getWeatherInfo();
   const weather = this.getWeatherInfo(); // passe du hPa pur
   const label = this._translations[weather.key] || weather.key;
 
@@ -288,13 +272,6 @@ render() {
   });
 
   // Ticks
-  const ticks_old = Array.from({ length: 11 }, (_, i) => 950 + i * 10).map(p => {
-    const a = startAngle + ((p - minP) / (maxP - minP)) * (endAngle - startAngle);
-    const p1 = this.polar(cx, cy, r + 16, a);
-    const p2 = this.polar(cx, cy, r - 24, a);
-    return svg`<line x1="${p1.x}" y1="${p1.y}" x2="${p2.x}" y2="${p2.y}" stroke="${tick_color}" stroke-width="2" />`;
-  });
-
   // valeurs fixes en hPa utilisées pour la position angulaire
   const ticksHpa = [950, 960, 970, 980, 990, 1000, 1010, 1020, 1030, 1040, 1050];
 
@@ -309,12 +286,6 @@ render() {
 
 
   // Labels
-  const labels_old = [960, 980, 1000, 1020, 1040].map(p => {
-    const a = startAngle + ((p - minP) / (maxP - minP)) * (endAngle - startAngle);
-    const pt = this.polar(cx, cy, r - 36, a);
-    return svg`<text x="${pt.x}" y="${pt.y}" font-size="0.9em" font-weight="bolder" class="label">${p}</text>`;
-  });
-
   // on étiquette un repère sur deux pour garder de l’espace
   const labelHpa = [960, 980, 1000, 1020, 1040];
 
