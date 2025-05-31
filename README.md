@@ -183,6 +183,10 @@ npm run build      # rollup – generates /dist/ha-tbaro-card.js
 - `git tag vX.Y.Z && git push --tags`
 - Create GitHub Release attaching **ha-tbaro-card.js**
 
+### Localization
+
+- ru: [Psytoshgen](https://github.com/Psytoshgen "Psytoshgen")
+
 ---
 
 ## 📄  Licence
