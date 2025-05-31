@@ -86,23 +86,24 @@ export class HaTbaroCard extends LitElement {
  
   /** multiplicateur pour aller DE la valeur brute VERS hPa */
   private static readonly UNIT_TO_HPA: Record<string, number> = {
-    hPa:   1,
+    hpa:   1,
     mbar:  1,
-    Pa:    0.01,
-    kPa:   10,
+    pa:    0.01,
+    kpa:   10,
     bar:   1000,
-    inHg:  33.8638866667,
-    mmHg:  1.333223684,
+    inhg:  33.8638866667,
+    mm:    1.333223684,          // mm Hg  ➔  hPa
   };
 
   private get rawHpa(): number {
-    const stateObj = this.hass.states[this.config.entity];
-    const value    = stateObj ? parseFloat(stateObj.state) : 1013.25;
-    const unitRaw  = (stateObj?.attributes?.unit_of_measurement || 'hPa').trim();
+    const st   = this.hass.states[this.config.entity];
+    const val  = st ? parseFloat(st.state) : 1013.25;
+    const unitRaw = (st?.attributes?.unit_of_measurement || 'hPa').toLowerCase();
 
-    const factor = HaTbaroCard.UNIT_TO_HPA[unitRaw] ?? 1; // défaut = déjà hPa
-    return value * factor;
+    const factor = HaTbaroCard.UNIT_TO_HPA[unitRaw] ?? 1;
+    return val * factor;
   }
+
 
 
   get pressure_old(): number {
@@ -119,8 +120,6 @@ export class HaTbaroCard extends LitElement {
       ? hpa * 0.75006156           // hPa → mmHg
       : hpa;                       // hPa à l’écran
   }
-
-
 
   polar(cx: number, cy: number, r: number, angle: number) {
     return {
@@ -358,7 +357,7 @@ render() {
         <image href="${this.getIconDataUrl(weather.icon)}" x="${iconX}" y="${iconY}" width="50" height="50" />
         <text x="${cx}" y="${labelY}" font-size="14" class="label">${label}</text>
           <text x="${cx}" y="${pressureY}" font-size="22" font-weight="bold" class="label">
-            ${this.config.unit === 'mm' ? pressure.toFixed(1) + ' mm' : pressure.toFixed(1) + ' hPa'}
+            ${this.config.unit === 'mm' ? pressure.toFixed(1) + ' mm' : pressure.toFixed(1) + ' hpa'}
           </text>
       </svg>`}
     </ha-card>
