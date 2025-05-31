@@ -193,9 +193,15 @@ render() {
   const labelY = (gaugeAngle === 180 ? cy - 25 : cy + 60);
   const pressureY = (gaugeAngle === 180 ? cy + 0 : cy + 85);
 
-    // ——— météo et localisation ———
-    const weather = this.getWeatherInfo(pressure);
-    const label = this._translations[weather.key] || weather.key;
+      // gestiopn de la locale
+  const lang = this.config.language || this.hass?.locale?.language || 'en';
+  if (!Object.keys(this._translations).length || !this._translations[lang]) {
+    this._translations = HaTbaroCard._localeMap[lang] || HaTbaroCard._localeMap['en'];
+  }
+
+  // ——— météo et localisation ———
+  const weather = this.getWeatherInfo(pressure);
+  const label = this._translations[weather.key] || weather.key;
 
   // Arcs colorés
   const arcs = segments!.map(seg => {
@@ -244,11 +250,6 @@ render() {
       `;
   })();
 
-    // gestiopn de la locale
-    const lang = this.config.language || this.hass?.locale?.language || 'en';
-    if (!Object.keys(this._translations).length || !this._translations[lang]) {
-      this._translations = HaTbaroCard._localeMap[lang] || HaTbaroCard._localeMap['en'];
-    }
 
 // à ajouter avant ${arcs} si on veut un border 1px autour de la gauge:
 // <circle cx="${cx}" cy="${cy}" r="${r + stroke_width / 2}" fill="none" stroke="#000" stroke-width="1" />
