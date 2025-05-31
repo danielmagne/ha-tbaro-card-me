@@ -82,28 +82,31 @@ export class HaTbaroCard extends LitElement {
     };
   }
 
-  private static HPA_TO_MMHG = 0.75006156;
- 
+  private static readonly HPA_TO_MM = 0.75006156;            // 1 hPa = 0.75006 mm
+  private static readonly MM_TO_HPA = 1 / HaTbaroCard.HPA_TO_MM;
+
+
   /** multiplicateur pour aller DE la valeur brute VERS hPa */
   private static readonly UNIT_TO_HPA: Record<string, number> = {
     hpa:   1,
     mbar:  1,
-    pa:    0.01,
-    kpa:   10,
-    bar:   1000,
+    mm:    HaTbaroCard.MM_TO_HPA,   // ≈ 1.333223684
+    mmhg:  HaTbaroCard.MM_TO_HPA,   // accepte « mmHg »
     inhg:  33.8638866667,
-    mm:    1.333223684,          // mm Hg  ➔  hPa
-    mmhg:  1.333223684,
   };
 
-  private get rawHpa(): number {
-    const st   = this.hass.states[this.config.entity];
-    const val  = st ? parseFloat(st.state) : 1013.25;
-    const unitRaw = (st?.attributes?.unit_of_measurement || 'hPa').toLowerCase();
 
-    const factor = HaTbaroCard.UNIT_TO_HPA[unitRaw] ?? 1;
+  private get rawHpa(): number {
+    const s = this.hass.states[this.config.entity];
+    const val = s ? parseFloat(s.state) : 1013.25;
+
+    const key = (s?.attributes?.unit_of_measurement || 'hPa')
+                  .toLowerCase().replace(/[^a-z]/g, '');
+
+    const factor = HaTbaroCard.UNIT_TO_HPA[key] ?? 1;   // défaut : déjà hPa
     return val * factor;
   }
+
 
 
 
@@ -111,16 +114,16 @@ export class HaTbaroCard extends LitElement {
     const state = this.hass.states[this.config.entity];
     const rawHpa = state ? parseFloat(state.state) : 1013.25;
     return this.config.unit === 'mm'
-      ? rawHpa * HaTbaroCard.HPA_TO_MMHG      // conversion visuelle
+      ? rawHpa * HaTbaroCard.HPA_TO_MM      // conversion visuelle
       : rawHpa;                               // conserve hPa sinon
   }
 
-    get pressure(): number {
-    const hpa = this.rawHpa;
+  get pressure(): number {
     return this.config.unit === 'mm'
-      ? hpa * 0.75006156           // hPa → mmHg
-      : hpa;                       // hPa à l’écran
+      ? this.rawHpa * HaTbaroCard.HPA_TO_MM      // hPa → mm
+      : this.rawHpa;                             // hPa direct
   }
+
 
   polar(cx: number, cy: number, r: number, angle: number) {
     return {
@@ -191,7 +194,7 @@ export class HaTbaroCard extends LitElement {
   getWeatherInfo_old(pDisplay: number): { key: string; icon: string } {
     // Ramener la valeur en hPa pour appliquer les seuils
     const hpa = this.config.unit === 'mm'
-      ? pDisplay / HaTbaroCard.HPA_TO_MMHG
+      ? pDisplay / HaTbaroCard.HPA_TO_MM
       : pDisplay;
 
     if (hpa < 980)  return { key: 'storm',  icon: 'storm'  };
@@ -200,11 +203,12 @@ export class HaTbaroCard extends LitElement {
     return               { key: 'sun',    icon: 'sun'    }; 
   }
 
-  getWeatherInfo(hpa: number): { key: string; icon: string } {
-    if (hpa < 980) return { key: 'storm',  icon: 'storm'  };
+  private getWeatherInfo(): { key: string; icon: string } {
+    const hpa = this.rawHpa;                    // seuils fixes
+    if (hpa < 980)  return { key: 'storm',  icon: 'storm'  };
     if (hpa < 1000) return { key: 'rain',   icon: 'rain'   };
     if (hpa < 1020) return { key: 'partly', icon: 'partly' };
-    return            { key: 'sun',    icon: 'sun'    };
+    return               { key: 'sun',    icon: 'sun'    };
   }
 
 
@@ -230,7 +234,7 @@ render() {
   const endAngle = gaugeAngle === 180 ? Math.PI * 2 : Math.PI * 2.25;
 
   const hpaValue_old = this.config.unit === 'mm'
-  ? pressure / HaTbaroCard.HPA_TO_MMHG
+  ? pressure / HaTbaroCard.HPA_TO_MM
   : pressure;
 
   const hpaValue = this.rawHpa; // pour l’angle et getWeatherInfo
@@ -258,8 +262,8 @@ render() {
   }
 
   // ——— météo et localisation ———
-  const weather_old = this.getWeatherInfo(pressure);
-  const weather = this.getWeatherInfo(hpaValue); // passe du hPa pur
+  const weather_old = this.getWeatherInfo();
+  const weather = this.getWeatherInfo(); // passe du hPa pur
   const label = this._translations[weather.key] || weather.key;
 
   // Arcs colorés
@@ -302,7 +306,7 @@ render() {
 
   const labels = labelHpa.map(p => {
     const display = this.config.unit === 'mm'
-      ? (p * HaTbaroCard.HPA_TO_MMHG).toFixed(0)   // entier mmHg
+      ? (p * HaTbaroCard.HPA_TO_MM).toFixed(0)   // entier mmHg
       : p.toString();                              // hPa brut
 
     const a  = startAngle + ((p - minP) / (maxP - minP)) * (endAngle - startAngle);
