@@ -113,6 +113,8 @@ Translations are stored in `locales/`:
 
 - `locales/en.json`
 - `locales/fr.json`
+- `locales/ru.json`
+- `locales/es.json`
 
 By default, the card uses the current Home Assistant UI language.
 You can override it explicitly using the `language` option:
