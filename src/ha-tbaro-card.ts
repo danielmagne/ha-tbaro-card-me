@@ -14,6 +14,7 @@ import stormIcon from './icons/storm.svg';
 
 import fr from '../locales/fr.json';
 import en from '../locales/en.json';
+import ru from '../locales/ru.json';
 
 interface Segment {
   from: number;
@@ -41,7 +42,7 @@ export class HaTbaroCard extends LitElement {
   @property({ type: Object }) config!: BaroCardConfig;
 
   private _translations: Record<string, string> = {};
-  private static _localeMap: Record<string, Record<string, string>> = { fr, en };
+  private static _localeMap: Record<string, Record<string, string>> = { fr, en, ru };
 
   static styles = [
     css`
