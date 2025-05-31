@@ -65,7 +65,7 @@ export class HaTbaroCard extends LitElement {
     //const lang = config.language || this.hass?.locale?.language || 'en';
     //this._translations = HaTbaroCard._localeMap[lang] || HaTbaroCard._localeMap['en'];
 
-    const lang = (this.config.language || this.hass?.locale?.language || 'en').toLowerCase();
+    const lang = (config.language || this.hass?.locale?.language || 'en').toLowerCase();
     if (!HaTbaroCard._localeMap[lang]) {
       console.warn(`No translation for "${lang}", fallback to English`);
       this._translations = HaTbaroCard._localeMap['en'];
