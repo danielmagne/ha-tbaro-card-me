@@ -62,7 +62,9 @@ export class HaTbaroCard extends LitElement {
     if (!config.entity) throw new Error("Entity is required");
 
     const lang = config.language || this.hass?.locale?.language || 'en';
-    this._translations = {};
+    this._translations = HaTbaroCard._localeMap[lang] || HaTbaroCard._localeMap['en'];
+
+
 
     this.config = {
       needle_color: '#000',
