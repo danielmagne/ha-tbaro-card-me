@@ -118,7 +118,6 @@ By default, the card uses the current Home Assistant UI language.
 You can override it explicitly using the `language` option:
 
 ```yaml
-language: fr  # or enyaml
 type: custom:ha-tbaro-card
 entity: sensor.pessac_pressure
 language: fr  # or en
