@@ -14,14 +14,20 @@ Barometric gauge card for Home Assistant — clean, customizable, SVG-based.
 
 ![preview](https://github.com/trollix/ha-tbaro-card/blob/main/img_tbaro_en.png?raw=true)
 
-## ✨ Features
+---
 
-- 🌀 Circular barometer gauge (fer à cheval)
-- 🎨 Colored segments based on pressure ranges
-- 📍 Animated needle
-- 🌤️ Weather icons (sun, rain, partly, storm)
-- 🌐 Multi-language support via external JSON files
-- 🧩 Lovelace-compatible and HACS-ready
+## ✨  Features
+
+| Feature | Details |
+|---------|---------|
+| 🌀 Gauge types | 270° (fer à cheval) **or** 180° (demi‑cercle) via `angle:` |
+| 📏 Units | `hpa` *(default)* or `mm` — auto‑detects the sensor’s unit and converts if needed |
+| 🎨 Segments | Colour ranges fully customisable |
+| 📍 Needle | SVG, width adaptable, optional hub in 180° mode |
+| 🌤  Icons | Sun / Partly / Rain / Storm (inline SVG, no external calls) |
+| 🌐 i18n | English & French JSON translations; falls back to HA UI language |
+| 🖼  Border | 1 px outline optional (`show_border: true`) |
+| 🛠  HACS | Repository compliant & versioned releases |
 
 ---
 
@@ -65,15 +71,20 @@ L’option `angle: 180` adapte dynamiquement :
 - le recentrage de l’icône météo au cœur de la gauge
 - la disposition des textes et étiquettes
 
+### `unit`
+
+- `hpa` (par défaut) : Affichage en hectoPascal (hpa)
+- `mm` : Affichage en mmHg (mm)
+
 ---
 
-## 🧪 Usage Example
+## 🧩  Lovelace usage
 
 ```yaml
 type: custom:ha-tbaro-card
-entity: sensor.pessac_pressure
-angle: 180  # or 270 (default)
-show_icon: true
+entity: sensor.pressure_outdoor
+angle: 180          # 180 or 270 (optional, default 270)
+unit: mm            # hpa or mm (optional, default hpa)
 show_border: true
 stroke_width: 20
 size: 300
@@ -119,13 +130,21 @@ language: fr  # or en
 
 ### Card (en)
 
-#### Baro-en
+#### Baro-en (hPa - hpa)
 
-![HA-TBARO-CARD](https://github.com/trollix/ha-tbaro-card/blob/main/img_tbaro_en.png?raw=true "Ha TBaro Card")
+![HA-TBARO-CARD](https://github.com/trollix/ha-tbaro-card/blob/main/img_tbaro_en_hpa.png?raw=true "Ha TBaro Card")
 
-#### Form-en
+#### Form-en (hPa - hpa)
 
-![HA-TBARO-CARD](https://github.com/trollix/ha-tbaro-card/blob/main/img_form_border_en.png?raw=true "Ha TBaro Card")
+![HA-TBARO-CARD](https://github.com/trollix/ha-tbaro-card/blob/main/img_form_en_hpa.png?raw=true "Ha TBaro Card")
+
+#### Baro-en (mmHg - mm)
+
+![HA-TBARO-CARD](https://github.com/trollix/ha-tbaro-card/blob/main/img_tbaro_en.png_mm?raw=true "Ha TBaro Card")
+
+#### Form-en (mmHg - mm)
+
+![HA-TBARO-CARD](https://github.com/trollix/ha-tbaro-card/blob/main/img_form_en_mm.png?raw=true "Ha TBaro Card")
 
 ### Card (fr)
 
@@ -135,19 +154,36 @@ language: fr  # or en
 
 #### form-fr
 
-![HA-TBARO-CARD](https://github.com/trollix/ha-tbaro-card/blob/main/img_form_border_fr.png?raw=true "Ha TBaro Card")
+![HA-TBARO-CARD](https://github.com/trollix/ha-tbaro-card/blob/main/img_form_fr.png?raw=true "Ha TBaro Card")
 
-## 🛠️ Dev
+#### Baro-fr (mmHg - mm)
+
+![HA-TBARO-CARD](https://github.com/trollix/ha-tbaro-card/blob/main/img_tbaro_fr_mm.png?raw=true "Ha TBaro Card")
+
+#### form-fr (mmHg - mm)
+
+![HA-TBARO-CARD](https://github.com/trollix/ha-tbaro-card/blob/main/img_form_fr_mm.png?raw=true "Ha TBaro Card")
+
+---
+
+## 🛠️  Development
 
 ```bash
 git clone https://github.com/trollix/ha-tbaro-card.git
 cd ha-tbaro-card
-npm install
-npm run build
+npm i
+npm run build      # rollup – generates /dist/ha-tbaro-card.js
 ```
+
+### Release checklist
+
+- Bump version in `package.json` & `hacs.json`
+- `npm run build` → commit generated file
+- `git tag vX.Y.Z && git push --tags`
+- Create GitHub Release attaching **ha-tbaro-card.js**
 
 ---
 
-## 🧾 License
+## 📄  Licence
 
-MIT — by [@trollix](https://github.com/your-username)
+[MIT](LICENSE)  ·  Made with ❤️  by [@trollix](https://github.com/trollix)
