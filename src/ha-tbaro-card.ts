@@ -227,19 +227,47 @@ render() {
   });
 
   // Ticks
-  const ticks = Array.from({ length: 11 }, (_, i) => 950 + i * 10).map(p => {
+  const ticks_old = Array.from({ length: 11 }, (_, i) => 950 + i * 10).map(p => {
     const a = startAngle + ((p - minP) / (maxP - minP)) * (endAngle - startAngle);
     const p1 = this.polar(cx, cy, r + 16, a);
     const p2 = this.polar(cx, cy, r - 24, a);
     return svg`<line x1="${p1.x}" y1="${p1.y}" x2="${p2.x}" y2="${p2.y}" stroke="${tick_color}" stroke-width="2" />`;
   });
 
+  // valeurs fixes en hPa utilisées pour la position angulaire
+  const ticksHpa = [950, 960, 970, 980, 990, 1000, 1010, 1020, 1030, 1040, 1050];
+
+  // rendu des traits
+  const ticks = ticksHpa.map(p => {
+    const a  = startAngle + ((p - minP) / (maxP - minP)) * (endAngle - startAngle);
+    const p1 = this.polar(cx, cy, r + 16, a);
+    const p2 = this.polar(cx, cy, r - 24, a);
+    return svg`<line x1="${p1.x}" y1="${p1.y}" x2="${p2.x}" y2="${p2.y}" stroke="${tick_color}" stroke-width="2" />`;
+  });
+
+
+
   // Labels
-  const labels = [960, 980, 1000, 1020, 1040].map(p => {
+  const labels_old = [960, 980, 1000, 1020, 1040].map(p => {
     const a = startAngle + ((p - minP) / (maxP - minP)) * (endAngle - startAngle);
     const pt = this.polar(cx, cy, r - 36, a);
     return svg`<text x="${pt.x}" y="${pt.y}" font-size="0.9em" font-weight="bolder" class="label">${p}</text>`;
   });
+
+  // on étiquette un repère sur deux pour garder de l’espace
+  const labelHpa = [960, 980, 1000, 1020, 1040];
+
+  const labels = labelHpa.map(p => {
+    const display = this.config.unit === 'mmHg'
+      ? (p * HaTbaroCard.HPA_TO_MMHG).toFixed(0)   // entier mmHg
+      : p.toString();                              // hPa brut
+
+    const a  = startAngle + ((p - minP) / (maxP - minP)) * (endAngle - startAngle);
+    const pt = this.polar(cx, cy, r - 36, a);
+    return svg`<text x="${pt.x}" y="${pt.y}" font-size="0.9em" font-weight="bolder" class="label">${display}</text>`;
+  });
+
+
 
   // Aiguille
   const needle = (() => {
@@ -287,7 +315,7 @@ render() {
         <image href="${this.getIconDataUrl(weather.icon)}" x="${iconX}" y="${iconY}" width="50" height="50" />
         <text x="${cx}" y="${labelY}" font-size="14" class="label">${label}</text>
           <text x="${cx}" y="${pressureY}" font-size="22" font-weight="bold" class="label">
-            ${this.config.unit === 'mmHg' ? pressure.toFixed(1) + ' inHg' : pressure.toFixed(1) + ' hPa'}
+            ${this.config.unit === 'mmHg' ? pressure.toFixed(1) + ' mmHg' : pressure.toFixed(1) + ' hPa'}
           </text>
       </svg>`}
     </ha-card>
