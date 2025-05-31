@@ -93,6 +93,7 @@ export class HaTbaroCard extends LitElement {
     bar:   1000,
     inhg:  33.8638866667,
     mm:    1.333223684,          // mm Hg  ➔  hPa
+    mmhg:  1.333223684,
   };
 
   private get rawHpa(): number {

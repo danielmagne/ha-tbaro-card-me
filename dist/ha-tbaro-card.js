@@ -70,4 +70,4 @@ const ct={attribute:!0,type:String,converter:y,reflect:!1,hasChanged:C},dt=(t=ct
         fill: #000;
         font-family: sans-serif;
       }
-    `,gt],At.HPA_TO_MMHG=.75006156,At.UNIT_TO_HPA={hpa:1,mbar:1,pa:.01,kpa:10,bar:1e3,inhg:33.8638866667,mm:1.333223684},t([pt({attribute:!1})],At.prototype,"hass",void 0),t([pt({type:Object})],At.prototype,"config",void 0),At=ut=t([(t=>(e,s)=>{void 0!==s?s.addInitializer((()=>{customElements.define(t,e)})):customElements.define(t,e)})("ha-tbaro-card")],At);export{At as HaTbaroCard};
+    `,gt],At.HPA_TO_MMHG=.75006156,At.UNIT_TO_HPA={hpa:1,mbar:1,pa:.01,kpa:10,bar:1e3,inhg:33.8638866667,mm:1.333223684,mmhg:1.333223684},t([pt({attribute:!1})],At.prototype,"hass",void 0),t([pt({type:Object})],At.prototype,"config",void 0),At=ut=t([(t=>(e,s)=>{void 0!==s?s.addInitializer((()=>{customElements.define(t,e)})):customElements.define(t,e)})("ha-tbaro-card")],At);export{At as HaTbaroCard};
