@@ -121,7 +121,7 @@ You can override it explicitly using the `language` option:
 
 ```yaml
 type: custom:ha-tbaro-card
-entity: sensor.pessac_pressure
+entity: sensor.local_pressure
 language: fr  # or en
 ```
 
