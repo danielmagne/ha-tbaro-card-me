@@ -87,8 +87,8 @@ export class HaTbaroCard extends LitElement {
 
 
     this.config = {
-      needle_color: '#000',
-      tick_color: '#000',
+      needle_color:   'var(--primary-color)',        // aiguille
+      tick_color:     'var(--primary-text-color)',   // graduations & point
       show_icon: true,
       stroke_width: 20,
       show_border: false,
