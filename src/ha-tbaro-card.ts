@@ -357,8 +357,7 @@ render() {
             ${label}
         </text>
         <text x="${cx}" y="${pressureY}" font-size="22" font-weight="bold" class="label">
-            ${
-              this.config.unit === 'mm'
+            ${this.config.unit === 'mm'
                 ? pressure.toFixed(1) + ' mm'
                 : this.config.unit === 'in'
                   ? pressure.toFixed(2) + ' inHg'
