@@ -35,7 +35,7 @@ interface Segment {
 interface BaroCardConfig {
   entity: string;
   language?: string;
-  unit?: 'hpa' | 'mm';
+  unit?: 'hpa' | 'mm' | 'in';
   needle_color?: string;
   tick_color?: string;
   show_icon?: boolean;
@@ -105,8 +105,10 @@ export class HaTbaroCard extends LitElement {
     };
   }
 
-  private static readonly HPA_TO_MM = 0.75006156;            // 1 hPa = 0.75006 mm
-  private static readonly MM_TO_HPA = 1 / HaTbaroCard.HPA_TO_MM;
+  private static readonly HPA_TO_MM  = 0.75006156;
+  private static readonly HPA_TO_IN  = 0.02953;        // 1 hPa = 0.02953 inHg
+  private static readonly MM_TO_HPA  = 1 / HaTbaroCard.HPA_TO_MM;
+  private static readonly IN_TO_HPA  = 1 / HaTbaroCard.HPA_TO_IN;
 
 
   /** multiplicateur pour aller DE la valeur brute VERS hPa */
@@ -115,7 +117,8 @@ export class HaTbaroCard extends LitElement {
     mbar:  1,
     mm:    HaTbaroCard.MM_TO_HPA,   // ≈ 1.333223684
     mmhg:  HaTbaroCard.MM_TO_HPA,   // accepte « mmHg »
-    inhg:  33.8638866667,
+    in:   HaTbaroCard.IN_TO_HPA,       // ← alias court
+    inhg: HaTbaroCard.IN_TO_HPA,       // ← alias complet
   };
 
 
@@ -132,9 +135,11 @@ export class HaTbaroCard extends LitElement {
 
 
   get pressure(): number {
-    return this.config.unit === 'mm'
-      ? this.rawHpa * HaTbaroCard.HPA_TO_MM      // hPa → mm
-      : this.rawHpa;                             // hPa direct
+    if (this.config.unit === 'mm')
+      return this.rawHpa * HaTbaroCard.HPA_TO_MM; // hPa → mm
+    if (this.config.unit === 'in')                // hPa → in
+      return this.rawHpa * HaTbaroCard.HPA_TO_IN;
+    return this.rawHpa;                           // hPa direct
   }
 
 
@@ -286,19 +291,21 @@ render() {
 
 
 
-  // Labels
-  // on étiquette un repère sur deux pour garder de l’espace
-  const labelHpa = [960, 980, 1000, 1020, 1040];
+    // Labels
+    // on étiquette un repère sur deux pour garder de l’espace
+    const labelHpa = [960, 980, 1000, 1020, 1040];
 
-  const labels = labelHpa.map(p => {
-    const display = this.config.unit === 'mm'
-      ? (p * HaTbaroCard.HPA_TO_MM).toFixed(0)   // entier mmHg
-      : p.toString();                              // hPa brut
+    const labels = labelHpa.map(p => {
+      const display = this.config.unit === 'mm'
+        ? (p * HaTbaroCard.HPA_TO_MM).toFixed(0)
+        : this.config.unit === 'in'
+          ? (p * HaTbaroCard.HPA_TO_IN).toFixed(2)
+          : p.toString();
 
-    const a  = startAngle + ((p - minP) / (maxP - minP)) * (endAngle - startAngle);
-    const pt = this.polar(cx, cy, r - 36, a);
-    return svg`<text x="${pt.x}" y="${pt.y}" font-size="0.9em" font-weight="bolder" class="label">${display}</text>`;
-  });
+      const a  = startAngle + ((p - minP) / (maxP - minP)) * (endAngle - startAngle);
+      const pt = this.polar(cx, cy, r - 36, a);
+      return svg`<text x="${pt.x}" y="${pt.y}" font-size="0.9em" font-weight="bolder" class="label">${display}</text>`;
+    });
 
 
 
@@ -346,10 +353,19 @@ render() {
         ${labels}
         ${needle}
         <image href="${this.getIconDataUrl(weather.icon)}" x="${iconX}" y="${iconY}" width="50" height="50" />
-        <text x="${cx}" y="${labelY}" font-size="14" class="label">${label}</text>
-          <text x="${cx}" y="${pressureY}" font-size="22" font-weight="bold" class="label">
+        <text x="${cx}" y="${labelY}" font-size="14" class="label">
+            ${label}
+        </text>
+        <text x="${cx}" y="${pressureY}" font-size="22" font-weight="bold" class="label">
             ${this.config.unit === 'mm' ? pressure.toFixed(1) + ' mm' : pressure.toFixed(1) + ' hpa'}
-          </text>
+            ${
+              this.config.unit === 'mm'
+                ? pressure.toFixed(1) + ' mm'
+                : this.config.unit === 'in'
+                  ? pressure.toFixed(2) + ' inHg'
+                  : pressure.toFixed(1) + ' hPa'
+            }
+        </text>
       </svg>`}
     </ha-card>
   `;
