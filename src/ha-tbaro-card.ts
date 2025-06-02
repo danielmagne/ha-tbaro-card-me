@@ -354,16 +354,17 @@ render() {
 
   // 1) Bloc icône stocké dans une variable
   const iconNode = html`
-    <ha-icon
-      .icon="${this.getMdiIcon(weather.key)}"
-      style="
-        --mdc-icon-size: 32px;
-        position: absolute;
-        left:${iconX}px;
-        top:${iconY}px;
-        color:${tick_color};
-      "
-    ></ha-icon>
+  <ha-icon
+    .icon=${this.getMdiIcon(weather.key)}
+    style="
+      --mdc-icon-size: 40px;           /* diamètre réel de l’icône */
+      position: absolute;
+      left:${iconX}px;
+      top:${iconY}px;
+      transform: translate(-50%, -50%);/* centre l’icône */
+      color:${tick_color};
+    "
+  ></ha-icon>
   `;
 
 
@@ -376,7 +377,7 @@ render() {
         ${ticks}
         ${labels}
         ${needle}
-        ${svgIcon}
+       
         <text x="${cx}" y="${labelY}" font-size="14" class="label">
             ${label}
         </text>
@@ -390,7 +391,7 @@ render() {
         </text>
       </svg>`}
       <!-- 2 On injecte la variable ici, hors du <svg> -->
-      <!-- ${iconNode}  -->
+      ${iconNode} 
 
     </ha-card>
   `;
