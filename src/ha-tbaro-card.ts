@@ -214,6 +214,17 @@ export class HaTbaroCard extends LitElement {
     return               { key: 'sun',    icon: 'sun'    };
   }
 
+  /** Retourne le nom mdi correspondant à weather.key */
+  private getMdiIcon(id: string): string {
+    const map: Record<string, string> = {
+      sun:    'mdi:weather-sunny',
+      partly: 'mdi:weather-partly-cloudy',
+      rain:   'mdi:weather-rainy',
+      storm:  'mdi:weather-lightning',
+    };
+    return map[id] ?? 'mdi:weather-cloudy';
+  }
+
 
 
 
@@ -242,10 +253,6 @@ render() {
   const hpaValue = this.rawHpa; // pour l’angle et getWeatherInfo
   const valueAngle = startAngle
     + ((hpaValue - minP) / (maxP - minP)) * (endAngle - startAngle);
-
-
-
-
 
 
   // Position dynamique des éléments verticaux
@@ -307,9 +314,8 @@ render() {
     });
 
 
-
-  // Aiguille
-  const needle = (() => {
+    // Aiguille
+    const needle = (() => {
 
     //const needleLength = gaugeAngle === 180 ? r - 60 : r - 35;
     //const baseLength = gaugeAngle === 180 ? 30 : 16;
@@ -337,21 +343,39 @@ render() {
   // à ajouter avant ${arcs} si on veut un border 1px autour de la gauge:
   // <circle cx="${cx}" cy="${cy}" r="${r + stroke_width / 2}" fill="none" stroke="#000" stroke-width="1" />
 
-    //const label = pressure > 1020 ? 'Soleil radieux' : pressure < 980 ? 'Tempête' : pressure < 1000 ? 'Pluie probable' : 'Ciel dégagé';
+  //const label = pressure > 1020 ? 'Soleil radieux' : pressure < 980 ? 'Tempête' : pressure < 1000 ? 'Pluie probable' : 'Ciel dégagé';
 
-    // début création border fer à cheval
-    const borderRadius = r + stroke_width / 2 + 0.5;
-    const borderArc = svg`<path d="${this.describeArc(cx, cy, borderRadius, startAngle, endAngle)}" stroke="#000" stroke-width="1" fill="none" />`;
+  // début création border fer à cheval
+  const borderRadius = r + stroke_width / 2 + 0.5;
+  const borderArc = svg`<path d="${this.describeArc(cx, cy, borderRadius, startAngle, endAngle)}" stroke="#000" stroke-width="1" fill="none" />`;
+
+  //  <image href="${this.getIconDataUrl(weather.icon)}" x="${iconX}" y="${iconY}" width="50" height="50" />
+
+  // 1) Bloc icône stocké dans une variable
+  const iconNode = html`
+    <ha-icon
+      .icon="${this.getMdiIcon(weather.key)}"
+      style="
+        --mdc-icon-size: 50px;
+        position: absolute;
+        left:${iconX}px;
+        top:${iconY}px;
+        color:${tick_color};
+      "
+    ></ha-icon>
+  `;
+
 
   return html`
-    <ha-card style="box-shadow:none;background:transparent;border:none;border-radius:0;">
+    <ha-card style="box-shadow:none;background:transparent;border:none;border-radius:0;position:relative;">
+
       ${svg`<svg viewBox="0 0 300 300" style="max-width:${size}px;height:auto">
         ${show_border ? borderArc : nothing}
         ${arcs}
         ${ticks}
         ${labels}
         ${needle}
-        <image href="${this.getIconDataUrl(weather.icon)}" x="${iconX}" y="${iconY}" width="50" height="50" />
+        
         <text x="${cx}" y="${labelY}" font-size="14" class="label">
             ${label}
         </text>
@@ -364,6 +388,9 @@ render() {
             }
         </text>
       </svg>`}
+      <!-- 2 On injecte la variable ici, hors du <svg> -->
+      ${iconNode}
+
     </ha-card>
   `;
     //  si on veut afficher une image en HTML: ${show_icon ? this.getIcon(weather.icon) : nothing}

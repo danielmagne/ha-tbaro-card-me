@@ -16,4 +16,8 @@ export default css`
   filter: var(--ha-card-icon-filter);  /* s’adapte au thème */
 }
 
+:host([data-theme="dark"]) ha-icon {
+  color: #ffc107;      /* exemple = jaune doré dans le thème sombre */
+}
+
 `;
