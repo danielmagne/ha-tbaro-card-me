@@ -295,12 +295,14 @@ render() {
     // on étiquette un repère sur deux pour garder de l’espace
     const labelHpa = [960, 980, 1000, 1020, 1040];
 
+    // Labels convertis
     const labels = labelHpa.map(p => {
-      const display = this.config.unit === 'mm'
-        ? (p * HaTbaroCard.HPA_TO_MM).toFixed(0)
-        : this.config.unit === 'in'
-          ? (p * HaTbaroCard.HPA_TO_IN).toFixed(2)
-          : p.toString();
+      const display =
+        this.config.unit === 'mm'
+          ? (p * HaTbaroCard.HPA_TO_MM).toFixed(0)
+          : this.config.unit === 'in'
+              ? (p * HaTbaroCard.HPA_TO_IN).toFixed(2)
+              : p.toString();
 
       const a  = startAngle + ((p - minP) / (maxP - minP)) * (endAngle - startAngle);
       const pt = this.polar(cx, cy, r - 36, a);
@@ -356,7 +358,7 @@ render() {
         <text x="${cx}" y="${labelY}" font-size="14" class="label">
             ${label}
         </text>
-        <text x="${cx}" y="${pressureY}" font-size="22" font-weight="bold" class="label">
+        <text x="${cx}" y="${pressureY}" font-size="22" font-weight="bold" class="label">+
             ${this.config.unit === 'mm'
                 ? pressure.toFixed(1) + ' mm'
                 : this.config.unit === 'in'
