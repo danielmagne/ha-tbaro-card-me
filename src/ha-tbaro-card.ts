@@ -370,6 +370,6 @@ render() {
     </ha-card>
   `;
     //  si on veut afficher une image en HTML: ${show_icon ? this.getIcon(weather.icon) : nothing}
-    // mais il faut le faire hors du svg.
+    // mais il faut le faire hors du svg...
   }
 }
