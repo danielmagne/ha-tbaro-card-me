@@ -361,7 +361,7 @@ render() {
       position: absolute;
       left:${iconX}px;
       top:${iconY}px;
-      transform: translate(480%, -20%);/* centre l’icône */
+      transform: translate(470%, -25%);/* centre l’icône */
       color:${tick_color};
     "
   ></ha-icon>
