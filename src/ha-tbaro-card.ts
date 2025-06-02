@@ -360,10 +360,10 @@ render() {
             ${this.config.unit === 'mm' ? pressure.toFixed(1) + ' mm' : pressure.toFixed(1) + ' hpa'}
             ${
               this.config.unit === 'mm'
-                ? pressure.toFixed(1) + ' mm'
+                ? pressure.toFixed(1) + ' -mm'
                 : this.config.unit === 'in'
-                  ? pressure.toFixed(2) + ' inHg'
-                  : pressure.toFixed(1) + ' hPa'
+                  ? pressure.toFixed(2) + ' -inHg'
+                  : pressure.toFixed(1) + ' -hPa'
             }
         </text>
       </svg>`}
