@@ -350,13 +350,14 @@ render() {
   const borderArc = svg`<path d="${this.describeArc(cx, cy, borderRadius, startAngle, endAngle)}" stroke="#000" stroke-width="1" fill="none" />`;
 
   //  <image href="${this.getIconDataUrl(weather.icon)}" x="${iconX}" y="${iconY}" width="50" height="50" />
+  const svgIcon = svg`<image href="${this.getIconDataUrl(weather.icon)}" x="${iconX}" y="${iconY}" width="50" height="50" />`;
 
   // 1) Bloc icône stocké dans une variable
   const iconNode = html`
     <ha-icon
       .icon="${this.getMdiIcon(weather.key)}"
       style="
-        --mdc-icon-size: 50px;
+        --mdc-icon-size: 32px;
         position: absolute;
         left:${iconX}px;
         top:${iconY}px;
@@ -375,7 +376,7 @@ render() {
         ${ticks}
         ${labels}
         ${needle}
-        
+        ${svgIcon}
         <text x="${cx}" y="${labelY}" font-size="14" class="label">
             ${label}
         </text>
@@ -389,7 +390,7 @@ render() {
         </text>
       </svg>`}
       <!-- 2 On injecte la variable ici, hors du <svg> -->
-      ${iconNode}
+      <!-- ${iconNode}  -->
 
     </ha-card>
   `;
