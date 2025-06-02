@@ -337,8 +337,8 @@ render() {
   })();
 
 
-// à ajouter avant ${arcs} si on veut un border 1px autour de la gauge:
-// <circle cx="${cx}" cy="${cy}" r="${r + stroke_width / 2}" fill="none" stroke="#000" stroke-width="1" />
+  // à ajouter avant ${arcs} si on veut un border 1px autour de la gauge:
+  // <circle cx="${cx}" cy="${cy}" r="${r + stroke_width / 2}" fill="none" stroke="#000" stroke-width="1" />
 
     //const label = pressure > 1020 ? 'Soleil radieux' : pressure < 980 ? 'Tempête' : pressure < 1000 ? 'Pluie probable' : 'Ciel dégagé';
 
