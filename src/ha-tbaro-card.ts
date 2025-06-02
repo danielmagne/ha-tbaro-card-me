@@ -357,11 +357,11 @@ render() {
   <ha-icon
     .icon=${this.getMdiIcon(weather.key)}
     style="
-      --mdc-icon-size: 32px;           /* diamètre réel de l’icône */
+      --mdc-icon-size: 24px;           /* diamètre réel de l’icône */
       position: absolute;
       left:${iconX}px;
       top:${iconY}px;
-      transform: translate(150%, -50%);/* centre l’icône */
+      transform: translate(500%, -50%);/* centre l’icône */
       color:${tick_color};
     "
   ></ha-icon>
