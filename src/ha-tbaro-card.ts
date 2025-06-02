@@ -377,7 +377,7 @@ render() {
         ${ticks}
         ${labels}
         ${needle}
-       
+        ${svgIcon}
         <text x="${cx}" y="${labelY}" font-size="14" class="label">
             ${label}
         </text>
@@ -391,7 +391,7 @@ render() {
         </text>
       </svg>`}
       <!-- 2 On injecte la variable ici, hors du <svg> -->
-      ${iconNode} 
+      <!-- ${iconNode} --> 
 
     </ha-card>
   `;
