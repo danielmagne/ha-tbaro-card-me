@@ -293,8 +293,8 @@ render() {
     return svg`<line x1="${p1.x}" y1="${p1.y}" x2="${p2.x}" y2="${p2.y}" stroke="${tick_color}" stroke-width="2" />`;
   });
 
-  const TICK_LEN_OUT = 5;   // pixels hors de l’arc
-  const TICK_LEN_IN  = 1;   // pixels vers l’intérieur
+  const TICK_LEN_OUT = 1;   // pixels hors de l’arc
+  const TICK_LEN_IN  = 2;   // pixels vers l’intérieur
 
   const ticks = ticksHpa.map(p => {
     const a  = startAngle + ((p - minP) / (maxP - minP)) * (endAngle - startAngle);
