@@ -294,8 +294,7 @@ render() {
   });
 
   //const tickWidth = this.config.tick_width ?? Math.max(1, Math.round(stroke_width * 0.10));
-  const tickWidth = stroke_width * 0.08;
-
+  const TICK_WIDTH = 1;//stroke_width * 0.08;
   const TICK_LEN_OUT = 1;   // pixels hors de l’arc
   const TICK_LEN_IN  = 2;   // pixels vers l’intérieur
 
@@ -314,7 +313,7 @@ render() {
     return svg`
       <line x1="${p1.x}" y1="${p1.y}"
             x2="${p2.x}" y2="${p2.y}"
-            stroke="${tick_color}" stroke-width="${tickWidth}" />
+            stroke="${tick_color}" stroke-width="${TICK_WIDTH}" />
     `;
   });
 
