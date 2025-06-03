@@ -286,11 +286,33 @@ render() {
   const ticksHpa = [950, 960, 970, 980, 990, 1000, 1010, 1020, 1030, 1040, 1050];
 
   // rendu des traits
-  const ticks = ticksHpa.map(p => {
+  const ticks_old = ticksHpa.map(p => {
     const a  = startAngle + ((p - minP) / (maxP - minP)) * (endAngle - startAngle);
     const p1 = this.polar(cx, cy, r + 16, a);
     const p2 = this.polar(cx, cy, r - 24, a);
     return svg`<line x1="${p1.x}" y1="${p1.y}" x2="${p2.x}" y2="${p2.y}" stroke="${tick_color}" stroke-width="2" />`;
+  });
+
+  const TICK_LEN_OUT = 5;   // pixels hors de l’arc
+  const TICK_LEN_IN  = 2;   // pixels vers l’intérieur
+
+  const ticks = ticksHpa.map(p => {
+    const a  = startAngle + ((p - minP) / (maxP - minP)) * (endAngle - startAngle);
+
+    /* rayon extérieur = arc + moitié du trait + dépassement */
+    const rOuter = r + stroke_width / 2 + TICK_LEN_OUT;
+
+    /* rayon intérieur = arc – moitié du trait – petit retrait */
+    const rInner = r - stroke_width / 2 - TICK_LEN_IN;
+
+    const p1 = this.polar(cx, cy, rOuter, a);   // extrémité extérieure
+    const p2 = this.polar(cx, cy, rInner, a);   // extrémité intérieure
+
+    return svg`
+      <line x1="${p1.x}" y1="${p1.y}"
+            x2="${p2.x}" y2="${p2.y}"
+            stroke="${tick_color}" stroke-width="2" />
+    `;
   });
 
 
