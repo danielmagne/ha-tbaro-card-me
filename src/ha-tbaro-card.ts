@@ -294,7 +294,7 @@ render() {
   });
 
   const TICK_LEN_OUT = 5;   // pixels hors de l’arc
-  const TICK_LEN_IN  = 2;   // pixels vers l’intérieur
+  const TICK_LEN_IN  = 1;   // pixels vers l’intérieur
 
   const ticks = ticksHpa.map(p => {
     const a  = startAngle + ((p - minP) / (maxP - minP)) * (endAngle - startAngle);
