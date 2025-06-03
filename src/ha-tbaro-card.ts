@@ -42,7 +42,7 @@ interface BaroCardConfig {
   stroke_width?: number;
   size?: number;
   angle?: 180 | 270;
-  show_border?: boolean;
+  border?: 'none' | 'outer' | 'inner' | 'both';
   segments?: Segment[];
 }
 
@@ -88,7 +88,7 @@ export class HaTbaroCard extends LitElement {
       tick_color:     'var(--primary-text-color)',   // graduations & point
       show_icon: true,
       stroke_width: 20,
-      show_border: false,
+      border: 'outer',   // valeur par défaut
       size: 300,
       angle: 270,
       unit: 'hpa',
@@ -239,12 +239,12 @@ render() {
     size,
     segments,
     angle: gaugeAngle = 270,  // ← ici l’angle
-    show_border = false,
+    border = 'outer',
   } = this.config;
 
-    const stroke_width = this.config.stroke_width ?? 20;
-    const cx = 150, r = 110, cy = 150;
-    const minP = 950, maxP = 1050;
+  const stroke_width = this.config.stroke_width ?? 20;
+  const cx = 150, r = 110, cy = 150;
+  const minP = 950, maxP = 1050;
 
   // Gestion de l'angle dynamique
   const startAngle = gaugeAngle === 180 ? Math.PI : Math.PI * 0.75;
@@ -369,6 +369,12 @@ render() {
 
   // début création border fer à cheval
   const borderRadius = r + stroke_width / 2 + 0.5;
+  const outerR = r + stroke_width / 2 + 0.5;        // ≈ 0.5 px de marge
+  const innerR = r - stroke_width / 2 - 0.5;
+
+  const borderOuter = svg`<path d="${this.describeArc(cx, cy, outerR, startAngle, endAngle)}" stroke="#000" stroke-width="1" fill="none" />`;
+  const borderInner = svg`<path d="${this.describeArc(cx, cy, innerR, startAngle, endAngle)}" stroke="#000" stroke-width="1" fill="none" />`;
+
   const borderArc = svg`<path d="${this.describeArc(cx, cy, borderRadius, startAngle, endAngle)}" stroke="#000" stroke-width="1" fill="none" />`;
 
   //  <image href="${this.getIconDataUrl(weather.icon)}" x="${iconX}" y="${iconY}" width="50" height="50" />
@@ -394,7 +400,10 @@ render() {
     <ha-card style="box-shadow:none;background:transparent;border:none;border-radius:0;position:relative;">
 
       ${svg`<svg viewBox="0 0 300 300" style="max-width:${size}px;height:auto">
-        ${show_border ? borderArc : nothing}
+   
+        ${this.config.border !== 'none' && (this.config.border === 'inner' || this.config.border === 'both') ? borderInner : nothing}
+        ${this.config.border === 'outer' || this.config.border === 'both' ? borderOuter : nothing}
+
         ${arcs}
         ${ticks}
         ${labels}
