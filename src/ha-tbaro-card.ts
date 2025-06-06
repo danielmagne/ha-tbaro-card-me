@@ -356,7 +356,8 @@ render() {
     const offset = gaugeAngle === 180 ? 7 : 5; // grosseur de l'aiguille
     const baseL = { x: base.x + Math.cos(sideAngle) * offset, y: base.y + Math.sin(sideAngle) * offset };
     const baseR = { x: base.x - Math.cos(sideAngle) * offset, y: base.y - Math.sin(sideAngle) * offset };
-            const dot = gaugeAngle === 180 ? nothing : svg`<circle cx="${cx}" cy="${cy}" r="10" fill="${tick_color}" />`;
+    const dot = gaugeAngle === 180 ? nothing : svg`<circle cx="${cx}" cy="${cy}" r="10" fill="${tick_color}" />`;
+    
     return svg`
       <polygon points="${tip.x},${tip.y} ${baseL.x},${baseL.y} ${baseR.x},${baseR.y}" fill="${needle_color}" />
       ${dot}
@@ -397,11 +398,15 @@ render() {
   ></ha-icon>
   `;
 
+  // Hauteur utile : ±180 px au lieu de 300 px
+  const viewHeight = gaugeAngle === 180 ? 180 : 300;
+  const clipHeight = gaugeAngle === 180 ? (size! / 300) * 180 : 'auto';
 
   return html`
-    <ha-card style="box-shadow:none;background:transparent;border:none;border-radius:0;position:relative;">
+    <ha-card style="box-shadow:none;background:transparent;border:none;">
+    <div style="overflow:hidden;height:${clipHeight};"></div>
 
-      ${svg`<svg viewBox="0 0 300 300" style="max-width:${size}px;height:auto">
+      ${svg`<svg viewBox="0 0 300 ${viewHeight}" style="max-width:${size}px;height:auto">
    
         ${this.config.border !== 'none' && (this.config.border === 'inner' || this.config.border === 'both') ? borderInner : nothing}
         ${this.config.border === 'outer' || this.config.border === 'both' ? borderOuter : nothing}
