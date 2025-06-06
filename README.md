@@ -16,26 +16,26 @@ Barometric gauge card for Home Assistant — clean, customizable, SVG-based.
 
 ---
 
-## ✨  Features
+## Features
 
 | Feature | Details |
 |---------|---------|
-| 🌀 Gauge types | 270° (fer à cheval) **or** 180° (demi‑cercle) via `angle:` |
-| 📏 Units | `hpa` *(default)* or `mm` or `in` — auto‑detects the sensor’s unit and converts if needed |
-| 🎨 Segments | Colour ranges fully customisable |
-| 📍 Needle | SVG, width adaptable, optional hub in 180° mode |
-| 🌤  Icons | Sun / Partly / Rain / Storm (inline SVG, no external calls) |
-| 🌐 i18n | English & French JSON translations; falls back to HA UI language |
-| 🖼  Border | 1 px outline optional (`show_border: true`) |
-| 🛠  HACS | Repository compliant & versioned releases |
+| Gauge types | 270° (fer à cheval) **or** 180° (demi‑cercle) via `angle:` |
+| Units | `hpa` *(default)* or `mm` or `in` — auto‑detects the sensor’s unit and converts if needed |
+| Segments | Colour ranges fully customisable |
+| Needle | SVG, width adaptable, optional hub in 180° mode |
+| Icons | Sun / Partly / Rain / Storm (inline SVG, no external calls) |
+| i18n | English & French JSON translations; falls back to HA UI language |
+| Border | 1 px outline optional (`show_border: true`) |
+| HACS | Repository compliant & versioned releases |
 
 ---
 
-## 📦 Installation
+## Installation
 
 ### Option 1: via HACS (recommended)
 
-✨ Install via HACS
+Install via HACS
 
 [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=trollix&repository=ha-tbaro-card)
 
@@ -57,7 +57,7 @@ resources:
 
 ---
 
-## ⚙️ Options
+## Options
 
 ### `angle`
 
@@ -79,7 +79,7 @@ L’option `angle: 180` adapte dynamiquement :
 
 ---
 
-## 🧩  Lovelace usage
+## Lovelace usage
 
 ```yaml
 type: custom:ha-tbaro-card
@@ -108,7 +108,7 @@ segments:
 
 ---
 
-## 🌍 Localization
+## Localization
 
 Translations are stored in `locales/`:
 
@@ -168,7 +168,7 @@ language: fr  # or en
 
 ---
 
-## 🛠️  Development
+## Development
 
 ```bash
 git clone https://github.com/trollix/ha-tbaro-card.git
@@ -184,12 +184,13 @@ npm run build      # rollup – generates /dist/ha-tbaro-card.js
 - `git tag vX.Y.Z && git push --tags`
 - Create GitHub Release attaching **ha-tbaro-card.js**
 
-### Localization
+### Thanks for Localization
 
 - ru: [Psytoshgen](https://github.com/Psytoshgen "Psytoshgen")
+- de: [hendrik001973](https://github.com/hendrik001973 "hendrik001973")
 
 ---
 
-## 📄  Licence
+## Licence
 
-[MIT](LICENSE)  ·  Made with ❤️  by [@trollix](https://github.com/trollix)
+[MIT](LICENSE)  ·  Made by [@trollix](https://github.com/trollix)

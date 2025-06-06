@@ -16,7 +16,7 @@ import fr from '../locales/fr.json';
 import en from '../locales/en.json';
 import ru from '../locales/ru.json';
 import es from '../locales/es.json';
-import de from '../locales/es.json';
+import de from '../locales/de.json';
 
 // Print Version to Console
 import { version, name } from '../package.json'
