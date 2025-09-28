@@ -266,7 +266,6 @@ render() {
   // const weatherYOffset = gaugeAngle === 180 ? -90 : 0;
   
   const iconX = cx - 25;
-  const iconY = (gaugeAngle === 180 ? cy+12 : cy+5 ) + iconYOffset;
   const labelY = (gaugeAngle === 180 ? cy - 25 : cy + 60);
   const pressureY = (gaugeAngle === 180 ? cy + 0 : cy + 85);
 
@@ -389,6 +388,7 @@ render() {
   const iconSize = this.config.icon_size ?? 50;           // default 50px
   const iconXCentered = cx - iconSize / 2;
   const iconYOffset = this.config.icon_y_offset ?? (gaugeAngle === 180 ? -90 : 0);
+  const iconY = (gaugeAngle === 180 ? cy+12 : cy+5 ) + iconYOffset;
   const iconYCentered = (gaugeAngle === 180 ? cy + 12 : cy + 5) + iconYOffset;
 
   const svgIcon = svg`
