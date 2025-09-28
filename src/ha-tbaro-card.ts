@@ -43,7 +43,8 @@ interface BaroCardConfig {
   show_label?: boolean;    
   stroke_width?: number;
   size?: number;
-  icon_size?: number; 
+  icon_size?: number;
+  icon_y_offset?: number;
   angle?: 180 | 270;
   border?: 'none' | 'outer' | 'inner' | 'both';
   segments?: Segment[];
@@ -95,6 +96,7 @@ export class HaTbaroCard extends LitElement {
       border: 'outer',   // valeur par défaut
       size: 300,
       icon_size: 50,
+      icon_y_offset: 0,
       angle: 270,
       unit: 'hpa',
       segments: [
@@ -385,8 +387,9 @@ render() {
 
   const borderArc = svg`<path d="${this.describeArc(cx, cy, borderRadius, startAngle, endAngle)}" stroke="#000" stroke-width="1" fill="none" />`;
 
-  const iconSize = this.config.icon_size ?? 50; // default 50px
+  const iconSize = this.config.icon_size ?? 50;           // default 50px
   const iconXCentered = cx - iconSize / 2;
+  const iconYOffset = this.config.icon_y_offset ?? (gaugeAngle === 180 ? -90 : 0);
   const iconYCentered = (gaugeAngle === 180 ? cy + 12 : cy + 5) + iconYOffset;
 
   const svgIcon = svg`
