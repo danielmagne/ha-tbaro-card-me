@@ -43,6 +43,7 @@ interface BaroCardConfig {
   show_label?: boolean;    
   stroke_width?: number;
   size?: number;
+  icon_size?: number; 
   angle?: 180 | 270;
   border?: 'none' | 'outer' | 'inner' | 'both';
   segments?: Segment[];
@@ -93,6 +94,7 @@ export class HaTbaroCard extends LitElement {
       stroke_width: 20,
       border: 'outer',   // valeur par défaut
       size: 300,
+      icon_size: 50,
       angle: 270,
       unit: 'hpa',
       segments: [
@@ -383,8 +385,20 @@ render() {
 
   const borderArc = svg`<path d="${this.describeArc(cx, cy, borderRadius, startAngle, endAngle)}" stroke="#000" stroke-width="1" fill="none" />`;
 
-  //  <image href="${this.getIconDataUrl(weather.icon)}" x="${iconX}" y="${iconY}" width="50" height="50" />
-  const svgIcon = svg`<image href="${this.getIconDataUrl(weather.icon)}" x="${iconX}" y="${iconY}" width="50" height="50" />`;
+  const iconSize = this.config.icon_size ?? 50; // default 50px
+  const iconXCentered = cx - iconSize / 2;
+  const iconYOffset = gaugeAngle === 180 ? -90 : 0;
+  const iconYCentered = (gaugeAngle === 180 ? cy + 12 : cy + 5) + iconYOffset;
+
+  const svgIcon = svg`
+    <image 
+      href="${this.getIconDataUrl(weather.icon)}" 
+      x="${iconXCentered}" 
+      y="${iconYCentered}" 
+      width="${iconSize}" 
+      height="${iconSize}" 
+    />
+  `;
 
   // 1) Bloc icône stocké dans une variable
   const iconNode = html`
