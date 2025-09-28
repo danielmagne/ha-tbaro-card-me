@@ -387,7 +387,6 @@ render() {
 
   const iconSize = this.config.icon_size ?? 50; // default 50px
   const iconXCentered = cx - iconSize / 2;
-  const iconYOffset = gaugeAngle === 180 ? -90 : 0;
   const iconYCentered = (gaugeAngle === 180 ? cy + 12 : cy + 5) + iconYOffset;
 
   const svgIcon = svg`
