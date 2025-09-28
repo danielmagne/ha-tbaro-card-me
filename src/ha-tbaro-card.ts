@@ -40,6 +40,7 @@ interface BaroCardConfig {
   needle_color?: string;
   tick_color?: string;
   show_icon?: boolean;
+  show_label?: boolean;    
   stroke_width?: number;
   size?: number;
   angle?: 180 | 270;
@@ -88,6 +89,7 @@ export class HaTbaroCard extends LitElement {
       needle_color:   'var(--primary-color)',        // aiguille
       tick_color:     'var(--primary-text-color)',   // graduations & point
       show_icon: true,
+      show_label: true,
       stroke_width: 20,
       border: 'outer',   // valeur par défaut
       size: 300,
@@ -417,9 +419,10 @@ render() {
         ${labels}
         ${needle}
         ${svgIcon}
-        <text x="${cx}" y="${labelY}" font-size="14" class="label">
-            ${label}
-        </text>
+        ${this.config.show_label
+          ? html`<text x="${cx}" y="${labelY}" font-size="14" class="label">${label}</text>`
+          : nothing
+        }
         <text x="${cx}" y="${pressureY}" font-size="22" font-weight="bold" class="label">
             ${this.config.unit === 'mm'
                 ? pressure.toFixed(1) + ' mm'
