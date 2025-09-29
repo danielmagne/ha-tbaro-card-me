@@ -3,7 +3,6 @@
 import { LitElement, html, css, svg, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { unsafeSVG } from 'lit/directives/unsafe-svg.js';
-import { actionHandler } from "custom-card-helpers";
 
 // Import SVG icons as strings via rollup-plugin-string
 // @ts-ignore
@@ -58,17 +57,6 @@ export class HaTbaroCard extends LitElement {
 
   private _translations: Record<string, string> = {};
   private static _localeMap: Record<string, Record<string, string>> = { fr, en, ru, es, de };
-
-  private _handleAction() {
-    if (this.hass && this.config.entity) {
-      const event = new CustomEvent("hass-more-info", {
-        detail: { entityId: this.config.entity },
-        bubbles: true,
-        composed: true,
-      });
-      this.dispatchEvent(event);
-    }
-  }
 
   static styles = [
     css`
@@ -283,39 +271,28 @@ export class HaTbaroCard extends LitElement {
     // Render card
     const viewHeight = gaugeAngle === 180 ? 180 : 300;
     const clipHeight = gaugeAngle === 180 ? (size! / 300) * 180 : 'auto';
-    
+
     return html`
-        <ha-card
-          style="position:relative; cursor:pointer;"
-          .actionHandler=${actionHandler({hasHold:false, hasDoubleClick:false})}
-          @action=${(ev) => {
-            if (ev.detail.action === "tap") {
-              this._handleAction();
-            }
-          }}
-        >
-        <!-- Clip container -->
+      <ha-card>
         <div style="overflow:hidden;height:${clipHeight};"></div>
-    
-        <!-- Main SVG with pointer-events disabled so clicks pass through -->
-        ${svg`<svg viewBox="0 0 300 ${viewHeight}" style="max-width:${size}px;height:auto; pointer-events: none;">
-            ${this.config.border !== 'none' && (this.config.border === 'inner' || this.config.border === 'both') ? borderInner : nothing}
-            ${this.config.border === 'outer' || this.config.border === 'both' ? borderOuter : nothing}
-            ${arcs}
-            ${ticks}
-            ${labels}
-            ${needle}
-            ${svgIcon}
-            ${this.config.show_label ? html`<text x="${cx}" y="${labelY}" font-size="14" class="label">${label}</text>` : nothing}
-            <text x="${cx}" y="${pressureY}" font-size="22" font-weight="bold" class="label">
-                ${this.config.unit === 'mm'
-                    ? Math.round(pressure) + ' mm'
-                    : this.config.unit === 'in'
-                      ? Math.round(pressure) + ' inHg'
-                      : Math.round(pressure) + ' hPa'
-                }
-            </text>
-          </svg>`}
+        ${svg`<svg viewBox="0 0 300 ${viewHeight}" style="max-width:${size}px;height:auto">
+          ${this.config.border !== 'none' && (this.config.border === 'inner' || this.config.border === 'both') ? borderInner : nothing}
+          ${this.config.border === 'outer' || this.config.border === 'both' ? borderOuter : nothing}
+          ${arcs}
+          ${ticks}
+          ${labels}
+          ${needle}
+          ${svgIcon}
+          ${this.config.show_label ? html`<text x="${cx}" y="${labelY}" font-size="14" class="label">${label}</text>` : nothing}
+          <text x="${cx}" y="${pressureY}" font-size="22" font-weight="bold" class="label">
+            ${this.config.unit === 'mm'
+                ? Math.round(pressure) + ' mm'
+                : this.config.unit === 'in'
+                  ? Math.round(pressure) + ' inHg'
+                  : Math.round(pressure) + ' hPa'
+            }
+          </text>
+        </svg>`}
       </ha-card>
     `;
   }
