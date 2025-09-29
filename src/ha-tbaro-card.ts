@@ -1,5 +1,7 @@
+// ha-tbaro-card-me.ts
+
 import { LitElement, html, css, svg, nothing } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement, property, state } from 'lit/decorators.js';
 import { unsafeSVG } from 'lit/directives/unsafe-svg.js';
 
 // Import SVG icons as strings via rollup-plugin-string
@@ -56,12 +58,19 @@ interface BaroCardConfig {
   segments?: Segment[];
   tap_action?: HassActionConfig;
   double_tap_action?: HassActionConfig;
+  show_min_max?: boolean;
+  show_trend?: boolean;
+  history_days?: number;
 }
 
 @customElement('ha-tbaro-card')
 export class HaTbaroCard extends LitElement {
   @property({ attribute: false }) hass: any;
   @property({ type: Object }) config!: BaroCardConfig;
+  @state() private _history?: any[];
+  @state() private _minHpa?: number;
+  @state() private _maxHpa?: number;
+  @state() private _trend?: 'up' | 'down' | 'stable';
 
   private _translations: Record<string, string> = {};
   private static _localeMap: Record<string, Record<string, string>> = { fr, en, ru, es, de };
@@ -105,6 +114,9 @@ export class HaTbaroCard extends LitElement {
       icon_y_offset: 0,
       angle: 270,
       unit: 'hpa',
+      show_min_max: true,
+      show_trend: true,
+      history_days: 7,
       tap_action: { action: 'more-info' },
       double_tap_action: { action: 'none' },
       segments: [
@@ -117,11 +129,69 @@ export class HaTbaroCard extends LitElement {
     };
   }
 
+  protected async updated(changedProperties: Map<string | number | symbol, unknown>) {
+    super.updated(changedProperties);
+    if (changedProperties.has('hass') || changedProperties.has('config')) {
+      if ((this.config.show_min_max || this.config.show_trend) && this.hass && this.config.entity) {
+        await this._fetchHistory();
+      }
+    }
+  }
+
+  private async _fetchHistory() {
+    try {
+      const endTime = new Date();
+      const startTime = new Date(endTime.getTime() - this.config.history_days * 24 * 60 * 60 * 1000);
+      const response = await this.hass.callWS({
+        type: 'history/history_during_period',
+        start_time: startTime.toISOString(),
+        end_time: endTime.toISOString(),
+        entity_ids: [this.config.entity],
+        significant_changes_only: false,
+        minimal_response: false,
+      });
+
+      const historyData = response[this.config.entity] || [];
+      if (historyData.length === 0) return;
+
+      // Convert all states to hPa using the same logic as rawHpa
+      const hpaHistory = historyData.map((state: any) => {
+        const val = parseFloat(state.state);
+        if (isNaN(val)) return null;
+        const unit = (state.attributes?.unit_of_measurement || 'hPa').toLowerCase().replace(/[^a-z]/g, '');
+        const factor = HaTbaroCard.UNIT_TO_HPA[unit] ?? 1;
+        return val * factor;
+      }).filter((v: number | null) => v !== null) as number[];
+
+      if (hpaHistory.length > 0 && this.config.show_min_max) {
+        this._minHpa = Math.min(...hpaHistory);
+        this._maxHpa = Math.max(...hpaHistory);
+      }
+
+      if (this.config.show_trend) {
+        // Get states from last 24h for average
+        const lastDayStart = new Date(endTime.getTime() - 24 * 60 * 60 * 1000);
+        const lastDayHpa = hpaHistory.filter((_, idx) => new Date(historyData[idx].last_changed) >= lastDayStart);
+        const avgLastDay = lastDayHpa.length > 0 ? lastDayHpa.reduce((a, b) => a + b, 0) / lastDayHpa.length : this.rawHpa;
+        const diff = this.rawHpa - avgLastDay;
+        this._trend = diff > 1 ? 'up' : diff < -1 ? 'down' : 'stable';
+      }
+
+      this._history = historyData;
+    } catch (error) {
+      console.error('Error fetching history for ha-tbaro-card:', error);
+      this._minHpa = undefined;
+      this._maxHpa = undefined;
+      this._trend = undefined;
+    }
+  }
+
   private static readonly HPA_TO_MM  = 0.75006156;
   private static readonly HPA_TO_IN  = 0.02953;
   private static readonly MM_TO_HPA  = 1 / HaTbaroCard.HPA_TO_MM;
   private static readonly IN_TO_HPA  = 1 / HaTbaroCard.HPA_TO_IN;
 
+  /** Conversion multipliers for units to hPa */
   private static readonly UNIT_TO_HPA: Record<string, number> = {
     hpa:   1,
     mbar:  1,
@@ -304,6 +374,42 @@ export class HaTbaroCard extends LitElement {
 
     const svgIcon = svg`<image href="${this.getIconDataUrl(weather.icon)}" x="${iconX}" y="${iconY}" width="${iconSize}" height="${iconSize}" />`;
 
+    // Min/Max markers (short lines at outer radius)
+    const minMaxMarkers = (() => {
+      if (!this.config.show_min_max || this._minHpa === undefined || this._maxHpa === undefined) return nothing;
+      const clampedMin = Math.max(minP, Math.min(maxP, this._minHpa));
+      const clampedMax = Math.max(minP, Math.min(maxP, this._maxHpa));
+      const minAngle = startAngle + ((clampedMin - minP) / (maxP - minP)) * (endAngle - startAngle);
+      const maxAngle = startAngle + ((clampedMax - minP) / (maxP - minP)) * (endAngle - startAngle);
+      const markerLen = 5;
+      const rOuter = r + stroke_width / 2 + 2;
+      const rInner = rOuter - markerLen;
+      const minP1 = this.polar(cx, cy, rOuter, minAngle);
+      const minP2 = this.polar(cx, cy, rInner, minAngle);
+      const maxP1 = this.polar(cx, cy, rOuter, maxAngle);
+      const maxP2 = this.polar(cx, cy, rInner, maxAngle);
+      return svg`
+        <line x1="${minP1.x}" y1="${minP1.y}" x2="${minP2.x}" y2="${minP2.y}" stroke="blue" stroke-width="3" />
+        <line x1="${maxP1.x}" y1="${maxP1.y}" x2="${maxP2.x}" y2="${maxP2.y}" stroke="red" stroke-width="3" />
+      `;
+    })();
+
+    // Trend arrow (simple SVG path, positioned right of pressure text)
+    const trendArrow = (() => {
+      if (!this.config.show_trend || this._trend === undefined) return nothing;
+      const arrowX = cx + 70; // Adjust based on text width
+      const arrowY = pressureY;
+      let path = '';
+      if (this._trend === 'up') {
+        path = 'M0 10 L5 0 L10 10'; // Up arrow
+      } else if (this._trend === 'down') {
+        path = 'M0 0 L5 10 L10 0'; // Down arrow
+      } else {
+        path = 'M0 5 L10 5'; // Flat line
+      }
+      return svg`<path d="${path}" stroke="${tick_color}" stroke-width="2" fill="none" transform="translate(${arrowX}, ${arrowY - 5})" />`;
+    })();
+
     const viewHeight = gaugeAngle === 180 ? 180 : 300;
     const clipHeight = gaugeAngle === 180 ? (size! / 300) * 180 : 'auto';
 
@@ -327,6 +433,7 @@ export class HaTbaroCard extends LitElement {
           ${ticks}
           ${labels}
           ${needle}
+          ${minMaxMarkers}
           ${this.config.show_icon ? svgIcon : nothing}
           ${this.config.show_label ? html`<text x="${cx}" y="${labelY}" font-size="14" class="label">${label}</text>` : nothing}
           <text x="${cx}" y="${pressureY}" font-size="22" font-weight="bold" class="label">
@@ -337,6 +444,7 @@ export class HaTbaroCard extends LitElement {
                   : Math.round(pressure) + ' hPa'
             }
           </text>
+          ${trendArrow}
         </svg>`}
       </ha-card>
     `;
