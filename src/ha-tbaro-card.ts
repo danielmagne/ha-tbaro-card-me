@@ -272,25 +272,34 @@ export class HaTbaroCard extends LitElement {
   const viewHeight = gaugeAngle === 180 ? 180 : 300;
   const clipHeight = gaugeAngle === 180 ? (size! / 300) * 180 : 'auto';
   
+  // Render card
   return html`
     <ha-card>
-      <div style="overflow:hidden;height:${clipHeight};"></div>
-      ${svg`<svg viewBox="0 0 300 ${viewHeight}" style="max-width:${size}px;height:auto">
-        ${this.config.border !== 'none' && (this.config.border === 'inner' || this.config.border === 'both') ? borderInner : nothing}
-        ${this.config.border === 'outer' || this.config.border === 'both' ? borderOuter : nothing}
-        ${arcs}
-        ${ticks}
-        ${labels}
-        ${needle}
-        ${svgIcon}
-        ${this.config.show_label ? html`<text x="${cx}" y="${labelY}" font-size="14" class="label">${label}</text>` : nothing}
-        <text
-          x="${cx}"
-          y="${pressureY}"
-          font-size="22"
-          font-weight="bold"
-          class="label"
-          style="cursor: pointer; pointer-events: all;"
+      <div style="overflow:hidden;height:${clipHeight}; position: relative;">
+        ${svg`<svg viewBox="0 0 300 ${viewHeight}" style="max-width:${size}px;height:auto">
+          ${this.config.border !== 'none' && (this.config.border === 'inner' || this.config.border === 'both') ? borderInner : nothing}
+          ${this.config.border === 'outer' || this.config.border === 'both' ? borderOuter : nothing}
+          ${arcs}
+          ${ticks}
+          ${labels}
+          ${needle}
+          ${svgIcon}
+          ${this.config.show_label ? html`<text x="${cx}" y="${labelY}" font-size="14" class="label">${label}</text>` : nothing}
+        </svg>`}
+  
+        <!-- Overlay div for pressure, clickable -->
+        <div
+          style="
+            position: absolute;
+            top: ${pressureY - 15}px; /* adjust vertically */
+            left: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 22px;
+            font-weight: bold;
+            cursor: pointer;
+            color: var(--primary-text-color);
+          "
           @click=${() => this.hass.moreInfo(this.config.entity)}
         >
           ${this.config.unit === 'mm'
@@ -299,10 +308,8 @@ export class HaTbaroCard extends LitElement {
                 ? Math.round(pressure) + ' inHg'
                 : Math.round(pressure) + ' hPa'
           }
-        </text>
-      </svg>`}
+        </div>
+      </div>
     </ha-card>
   `;
 
-  }
-}
