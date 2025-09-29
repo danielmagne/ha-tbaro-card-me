@@ -385,27 +385,30 @@ render() {
 
   const borderArc = svg`<path d="${this.describeArc(cx, cy, borderRadius, startAngle, endAngle)}" stroke="#000" stroke-width="1" fill="none" />`;
 
-  // Icon positioning
-  const iconSize = this.config.icon_size ?? 50;
-  const iconYOffset = this.config.icon_y_offset ?? 0;
+  // —— Optimized Icon Positioning ——
+  const iconSize = this.config.icon_size ?? 50;       // default icon size
+  const iconYOffset = this.config.icon_y_offset ?? 0; // user-defined vertical offset
 
-  // Base vertical position: center icon on gauge
+  // Determine vertical center based on gauge angle
+  // For semicircle (180°), shift slightly up for better visual alignment
   const baseIconY = gaugeAngle === 180
-    ? cy - r / 2             // semicircle: visually centered
-    : cy - r + iconSize / 2; // full circle: visually centered
+    ? cy - iconSize / 2 - 5   // tweak -5 for semicircle aesthetics
+    : cy - iconSize / 2;      // full circle or 270° gauges
 
-  // Reuse iconX if it exists; otherwise define it
-  let iconXPos = typeof iconX !== 'undefined' ? iconX : cx - iconSize / 2;
+  // Horizontal is always true center
+  const iconX = cx - iconSize / 2;
+
+  // Final Y with optional user offset
   const iconY = baseIconY + iconYOffset;
 
-  // Render SVG icon
+  // Render SVG image
   const svgIcon = svg`
-    <image 
-      href="${this.getIconDataUrl(weather.icon)}" 
-      x="${iconXPos}" 
-      y="${iconY}" 
-      width="${iconSize}" 
-      height="${iconSize}" 
+    <image
+      href="${this.getIconDataUrl(weather.icon)}"
+      x="${iconX}"
+      y="${iconY}"
+      width="${iconSize}"
+      height="${iconSize}"
     />
   `;
 
