@@ -268,14 +268,14 @@ export class HaTbaroCard extends LitElement {
   // Icon as SVG <image>
   const svgIcon = svg`<image href="${this.getIconDataUrl(weather.icon)}" x="${iconX}" y="${iconY}" width="${iconSize}" height="${iconSize}" />`;
   
-  // Render card
+  // Card height and clipping for semicircle or full circle
   const viewHeight = gaugeAngle === 180 ? 180 : 300;
   const clipHeight = gaugeAngle === 180 ? (size! / 300) * 180 : 'auto';
-  
-  // Render card
+
+  // Return the rendered card
   return html`
     <ha-card>
-      <div style="overflow:hidden;height:${clipHeight}; position: relative;">
+      <div style="overflow:hidden;height:${clipHeight};position: relative;">
         ${svg`<svg viewBox="0 0 300 ${viewHeight}" style="max-width:${size}px;height:auto">
           ${this.config.border !== 'none' && (this.config.border === 'inner' || this.config.border === 'both') ? borderInner : nothing}
           ${this.config.border === 'outer' || this.config.border === 'both' ? borderOuter : nothing}
@@ -286,12 +286,12 @@ export class HaTbaroCard extends LitElement {
           ${svgIcon}
           ${this.config.show_label ? html`<text x="${cx}" y="${labelY}" font-size="14" class="label">${label}</text>` : nothing}
         </svg>`}
-  
-        <!-- Overlay div for pressure, clickable -->
+
+        <!-- Overlay div for pressure (clickable) -->
         <div
           style="
             position: absolute;
-            top: ${pressureY - 15}px; /* adjust vertically */
+            top: ${pressureY - 15}px;
             left: 0;
             width: 100%;
             text-align: center;
