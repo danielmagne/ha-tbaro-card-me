@@ -286,10 +286,10 @@ export class HaTbaroCard extends LitElement {
           ${this.config.show_label ? html`<text x="${cx}" y="${labelY}" font-size="14" class="label">${label}</text>` : nothing}
           <text x="${cx}" y="${pressureY}" font-size="22" font-weight="bold" class="label">
             ${this.config.unit === 'mm'
-                ? Math.round(pressure) + ' mm'
+                ? Math.floor(pressure).toFixed(0) + ' mm'
                 : this.config.unit === 'in'
-                  ? Math.round(pressure) + ' inHg'
-                  : Math.round(pressure) + ' hPa'
+                  ? Math.floor(pressure).toFixed(0) + ' inHg'
+                  : Math.floor(pressure).toFixed(0) + ' hPa'
             }
           </text>
         </svg>`}
