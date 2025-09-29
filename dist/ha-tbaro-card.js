@@ -63,16 +63,16 @@ const ct={attribute:!0,type:String,converter:y,reflect:!1,hasChanged:A},dt=(t=ct
           ${P}
           ${T}
           ${this.config.show_label?B`<text x="${h}" y="${A}" font-size="14" class="label">${w}</text>`:q}
-          <text
-            x="${h}"
-            y="${C}"
-            font-size="22"
-            font-weight="bold"
+          <text 
+            x="${h}" 
+            y="${C}" 
+            font-size="22" 
+            font-weight="bold" 
             class="label"
-            style="cursor:pointer;"
-            @click=${()=>this.hass.callService("browser_mod.popup",{title:"Sensor Entity",card:{type:"entity",entity:this.config.entity}})}
+            style="cursor: pointer;"
+            @click=${()=>this.hass.callService("browser_mod","popup",{title:"Sensor Entity",card:{type:"entity",entity:this.config.entity}})}
           >
-            ${"mm"===this.config.unit?Math.floor(t).toFixed(0)+" mm":"in"===this.config.unit?Math.floor(t).toFixed(0)+" inHg":Math.floor(t).toFixed(0)+" hPa"}
+            ${"mm"===this.config.unit?Math.round(t)+" mm":"in"===this.config.unit?Math.round(t)+" inHg":Math.round(t)+" hPa"}
           </text>
         </svg>`}
       </ha-card>
