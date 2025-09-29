@@ -1,4 +1,5 @@
 // ha-tbaro-card-me.ts
+//custom version
 
 import { LitElement, html, css, svg, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
