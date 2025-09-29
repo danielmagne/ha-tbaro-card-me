@@ -271,10 +271,13 @@ export class HaTbaroCard extends LitElement {
     // Render card
     const viewHeight = gaugeAngle === 180 ? 180 : 300;
     const clipHeight = gaugeAngle === 180 ? (size! / 300) * 180 : 'auto';
-
+    
     return html`
-      <ha-card>
+      <ha-card style="position: relative;">
+        <!-- Clip container -->
         <div style="overflow:hidden;height:${clipHeight};"></div>
+    
+        <!-- Main SVG with pointer-events disabled so clicks pass through -->
         ${svg`<svg viewBox="0 0 300 ${viewHeight}" style="max-width:${size}px;height:auto; pointer-events: none;">
             ${this.config.border !== 'none' && (this.config.border === 'inner' || this.config.border === 'both') ? borderInner : nothing}
             ${this.config.border === 'outer' || this.config.border === 'both' ? borderOuter : nothing}
@@ -293,10 +296,12 @@ export class HaTbaroCard extends LitElement {
                 }
             </text>
           </svg>`}
-          <div
-            style="position:absolute; top:0; left:0; width:100%; height:100%; cursor:pointer;"
-            @click=${() => this.hass.moreInfo(this.config.entity)}
-          ></div>
+    
+        <!-- Full-card clickable overlay -->
+        <div
+          style="position:absolute; top:0; left:0; width:100%; height:100%; cursor:pointer;"
+          @click=${() => this.hass.moreInfo(this.config.entity)}
+        ></div>
       </ha-card>
     `;
   }
