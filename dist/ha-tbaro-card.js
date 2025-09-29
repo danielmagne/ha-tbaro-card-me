@@ -64,22 +64,22 @@ const ct={attribute:!0,type:String,converter:y,reflect:!1,hasChanged:A},dt=(t=ct
     `})),w=[960,980,1e3,1020,1040].map((t=>{const e="mm"===this.config.unit?(t*ut.HPA_TO_MM).toFixed(0):"in"===this.config.unit?(t*ut.HPA_TO_IN).toFixed(2):t.toString(),s=p+(t-d)/100*(u-p),i=this.polar(h,c,74,s);return F`<text x="${i.x}" y="${i.y}" font-size="0.9em" font-weight="bolder" class="label">${e}</text>`})),x=(()=>{const t=180===n?105:75,i=180===n?80:16,r=this.polar(h,c,t,f),o=this.polar(h,c,i,f),a=f+Math.PI/2,l=180===n?7:5,d=o.x+Math.cos(a)*l,p=o.y+Math.sin(a)*l,u=o.x-Math.cos(a)*l,g=o.y-Math.sin(a)*l,$=180===n?q:F`<circle cx="${h}" cy="${c}" r="10" fill="${s}" />`;return F`
       <polygon points="${r.x},${r.y} ${d},${p} ${u},${g}" fill="${e}" />
       ${$}
-      `})(),M=l+a/2+.5,E=l+a/2+.5,P=l-a/2-.5,k=F`<path d="${this.describeArc(h,c,E,p,u)}" stroke="#000" stroke-width="1" fill="none" />`,S=F`<path d="${this.describeArc(h,c,P,p,u)}" stroke="#000" stroke-width="1" fill="none" />`;F`<path d="${this.describeArc(h,c,M,p,u)}" stroke="#000" stroke-width="1" fill="none" />`;const L=this.config.icon_size??50,O=h-L/2,T=this.config.icon_y_offset??0,H=(180===n?162:155)+T,U=(180===n?162:155)+T,N=F`
+      `})(),M=l+a/2+.5,E=l+a/2+.5,P=l-a/2-.5,k=F`<path d="${this.describeArc(h,c,E,p,u)}" stroke="#000" stroke-width="1" fill="none" />`,S=F`<path d="${this.describeArc(h,c,P,p,u)}" stroke="#000" stroke-width="1" fill="none" />`;F`<path d="${this.describeArc(h,c,M,p,u)}" stroke="#000" stroke-width="1" fill="none" />`;const L=this.config.icon_size??50,O=this.config.icon_y_offset??0;const T=(180===n?95:40+L/2)+O,H=F`
     <image 
       href="${this.getIconDataUrl(y.icon)}" 
-      x="${O}" 
-      y="${U}" 
+      x="${125}" 
+      y="${T}" 
       width="${L}" 
       height="${L}" 
     />
-  `,I=B`
+  `,U=B`
   <ha-icon
     .icon=${this.getMdiIcon(y.key)}
     style="
       --mdc-icon-size: 24px;           /* diamètre réel de l’icône */
       position: absolute;
       left:${125}px;
-      top:${H}px;
+      top:${T}px;
       transform: translate(470%, -25%);/* centre l’icône */
       color:${s};
     "
@@ -97,14 +97,14 @@ const ct={attribute:!0,type:String,converter:y,reflect:!1,hasChanged:A},dt=(t=ct
         ${b}
         ${w}
         ${x}
-        ${N}
+        ${H}
         ${this.config.show_label?B`<text x="${h}" y="${$}" font-size="14" class="label">${A}</text>`:q}
         <text x="${h}" y="${_}" font-size="22" font-weight="bold" class="label">
             ${"mm"===this.config.unit?t.toFixed(1)+" mm":"in"===this.config.unit?t.toFixed(2)+" inHg":t.toFixed(1)+" hPa"}
         </text>
       </svg>`}
       <!-- 2 On injecte la variable ici, hors du <svg> -->
-      <!-- ${I} --> 
+      <!-- ${U} --> 
 
     </ha-card>
   `}};xt._localeMap={fr:yt,en:At,ru:Ct,es:vt,de:bt},xt.styles=[o`
