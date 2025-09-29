@@ -291,13 +291,7 @@ export class HaTbaroCard extends LitElement {
             font-weight="bold"
             class="label"
             style="cursor: pointer;"
-            @click=${() => this.hass.callService('browser_mod', 'popup', {
-              title: 'Sensor Entity',
-              card: {
-                type: 'entity',
-                entity: this.config.entity
-              }
-            })}
+            @click=${() => this.hass.moreInfo(this.config.entity)}
           >
             ${this.config.unit === 'mm'
                 ? Math.round(pressure) + ' mm'
