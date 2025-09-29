@@ -259,23 +259,22 @@ export class HaTbaroCard extends LitElement {
       return svg`<polygon points="${tip.x},${tip.y} ${baseL.x},${baseL.y} ${baseR.x},${baseR.y}" fill="${needle_color}" />${dot}`;
     })();
 
-  // Border arcs
-  const outerR = r + stroke_width / 2 + 0.5;
-  const innerR = r - stroke_width / 2 - 0.5;
-  const borderOuter = svg`<path d="${this.describeArc(cx, cy, outerR, startAngle, endAngle)}" stroke="#000" stroke-width="1" fill="none" />`;
-  const borderInner = svg`<path d="${this.describeArc(cx, cy, innerR, startAngle, endAngle)}" stroke="#000" stroke-width="1" fill="none" />`;
-  
-  // Icon as SVG <image>
-  const svgIcon = svg`<image href="${this.getIconDataUrl(weather.icon)}" x="${iconX}" y="${iconY}" width="${iconSize}" height="${iconSize}" />`;
-  
-  // Card height and clipping for semicircle or full circle
-  const viewHeight = gaugeAngle === 180 ? 180 : 300;
-  const clipHeight = gaugeAngle === 180 ? (size! / 300) * 180 : 'auto';
+    // Border arcs
+    const outerR = r + stroke_width / 2 + 0.5;
+    const innerR = r - stroke_width / 2 - 0.5;
+    const borderOuter = svg`<path d="${this.describeArc(cx, cy, outerR, startAngle, endAngle)}" stroke="#000" stroke-width="1" fill="none" />`;
+    const borderInner = svg`<path d="${this.describeArc(cx, cy, innerR, startAngle, endAngle)}" stroke="#000" stroke-width="1" fill="none" />`;
 
-  // Return the rendered card
-  return html`
-    <ha-card>
-      <div style="overflow:hidden;height:${clipHeight};position: relative;">
+    // Icon as SVG <image>
+    const svgIcon = svg`<image href="${this.getIconDataUrl(weather.icon)}" x="${iconX}" y="${iconY}" width="${iconSize}" height="${iconSize}" />`;
+
+    // Render card
+    const viewHeight = gaugeAngle === 180 ? 180 : 300;
+    const clipHeight = gaugeAngle === 180 ? (size! / 300) * 180 : 'auto';
+
+    return html`
+      <ha-card>
+        <div style="overflow:hidden;height:${clipHeight};"></div>
         ${svg`<svg viewBox="0 0 300 ${viewHeight}" style="max-width:${size}px;height:auto">
           ${this.config.border !== 'none' && (this.config.border === 'inner' || this.config.border === 'both') ? borderInner : nothing}
           ${this.config.border === 'outer' || this.config.border === 'both' ? borderOuter : nothing}
@@ -285,31 +284,16 @@ export class HaTbaroCard extends LitElement {
           ${needle}
           ${svgIcon}
           ${this.config.show_label ? html`<text x="${cx}" y="${labelY}" font-size="14" class="label">${label}</text>` : nothing}
+          <text x="${cx}" y="${pressureY}" font-size="22" font-weight="bold" class="label">
+            ${this.config.unit === 'mm'
+                ? Math.floor(pressure).toFixed(0) + ' mm'
+                : this.config.unit === 'in'
+                  ? Math.floor(pressure).toFixed(0) + ' inHg'
+                  : Math.floor(pressure).toFixed(0) + ' hPa'
+            }
+          </text>
         </svg>`}
-
-        <!-- Overlay div for pressure (clickable) -->
-        <div
-          style="
-            position: absolute;
-            top: ${pressureY - 15}px;
-            left: 0;
-            width: 100%;
-            text-align: center;
-            font-size: 22px;
-            font-weight: bold;
-            cursor: pointer;
-            color: var(--primary-text-color);
-          "
-          @click=${() => this.hass.moreInfo(this.config.entity)}
-        >
-          ${this.config.unit === 'mm'
-              ? Math.round(pressure) + ' mm'
-              : this.config.unit === 'in'
-                ? Math.round(pressure) + ' inHg'
-                : Math.round(pressure) + ' hPa'
-          }
-        </div>
-      </div>
-    </ha-card>
-  `;
-
+      </ha-card>
+    `;
+  }
+}
