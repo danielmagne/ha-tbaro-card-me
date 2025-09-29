@@ -385,22 +385,29 @@ render() {
 
   const borderArc = svg`<path d="${this.describeArc(cx, cy, borderRadius, startAngle, endAngle)}" stroke="#000" stroke-width="1" fill="none" />`;
 
-  const iconSize = this.config.icon_size ?? 50;           // default 50px
-  const iconXCentered = cx - iconSize / 2;
-  // Use 0 as baseline, only apply the user-configurable offset
+  // Icon positioning
+  const iconSize = this.config.icon_size ?? 50;
   const iconYOffset = this.config.icon_y_offset ?? 0;
-  const iconY = (gaugeAngle === 180 ? cy + 12 : cy + 5) + iconYOffset;
-  const iconYCentered = (gaugeAngle === 180 ? cy + 12 : cy + 5) + iconYOffset;
 
+  // Base vertical position: center icon on gauge
+  const baseIconY = gaugeAngle === 180
+    ? cy - r / 2             // semicircle: visually centered
+    : cy - r + iconSize / 2; // full circle: visually centered
+
+  const iconX = cx - iconSize / 2;
+  const iconY = baseIconY + iconYOffset;
+
+  // Render SVG icon
   const svgIcon = svg`
     <image 
       href="${this.getIconDataUrl(weather.icon)}" 
-      x="${iconXCentered}" 
-      y="${iconYCentered}" 
+      x="${iconX}" 
+      y="${iconY}" 
       width="${iconSize}" 
       height="${iconSize}" 
     />
   `;
+
 
   // 1) Bloc icône stocké dans une variable
   const iconNode = html`
