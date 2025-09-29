@@ -1,6 +1,3 @@
-// ha-tbaro-card-me.ts
-//custom version
-
 import { LitElement, html, css, svg, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { unsafeSVG } from 'lit/directives/unsafe-svg.js';
@@ -34,6 +31,14 @@ interface Segment {
   color: string;
 }
 
+interface HassActionConfig {
+  action: 'more-info' | 'navigate' | 'call-service' | 'none' | string;
+  entity?: string;
+  path?: string;
+  service?: string;
+  service_data?: Record<string, any>;
+}
+
 interface BaroCardConfig {
   entity: string;
   language?: string;
@@ -49,6 +54,8 @@ interface BaroCardConfig {
   angle?: 180 | 270;
   border?: 'none' | 'outer' | 'inner' | 'both';
   segments?: Segment[];
+  tap_action?: HassActionConfig;
+  double_tap_action?: HassActionConfig;
 }
 
 @customElement('ha-tbaro-card')
@@ -68,6 +75,9 @@ export class HaTbaroCard extends LitElement {
         fill: #000;
         font-family: sans-serif;
       }
+      ha-card {
+        cursor: pointer;
+      }
     `,
     weatherStyles
   ];
@@ -83,7 +93,6 @@ export class HaTbaroCard extends LitElement {
       this._translations = HaTbaroCard._localeMap[lang];
     }
 
-    // Default values with spread for overrides
     this.config = {
       needle_color: 'var(--primary-color)',
       tick_color: 'var(--primary-text-color)',
@@ -96,6 +105,8 @@ export class HaTbaroCard extends LitElement {
       icon_y_offset: 0,
       angle: 270,
       unit: 'hpa',
+      tap_action: { action: 'more-info' },
+      double_tap_action: { action: 'none' },
       segments: [
         { from: 950, to: 980, color: '#3399ff' },
         { from: 980, to: 1000, color: '#4CAF50' },
@@ -111,7 +122,6 @@ export class HaTbaroCard extends LitElement {
   private static readonly MM_TO_HPA  = 1 / HaTbaroCard.HPA_TO_MM;
   private static readonly IN_TO_HPA  = 1 / HaTbaroCard.HPA_TO_IN;
 
-  /** Conversion multipliers for units to hPa */
   private static readonly UNIT_TO_HPA: Record<string, number> = {
     hpa:   1,
     mbar:  1,
@@ -172,6 +182,42 @@ export class HaTbaroCard extends LitElement {
     return map[id] ?? 'mdi:weather-cloudy';
   }
 
+  private _handleAction(evt: MouseEvent, actionConfig?: HassActionConfig): void {
+    if (!actionConfig || actionConfig.action === 'none') return;
+
+    evt.stopPropagation();
+
+    const config = { ...actionConfig };
+
+    switch (config.action) {
+      case 'more-info':
+        this.dispatchEvent(new CustomEvent('hass-more-info', {
+          bubbles: true,
+          composed: true,
+          detail: { entityId: config.entity || this.config.entity }
+        }));
+        break;
+      case 'navigate':
+        if (config.path) {
+          history.pushState(null, '', config.path);
+          this.dispatchEvent(new CustomEvent('hass-navigate', {
+            bubbles: true,
+            composed: true,
+            detail: { path: config.path }
+          }));
+        }
+        break;
+      case 'call-service':
+        if (config.service) {
+          const [domain, service] = config.service.split('.');
+          this.hass.callService(domain, service, config.service_data);
+        }
+        break;
+      default:
+        console.warn(`Unsupported action: ${config.action}`);
+    }
+  }
+
   render() {
     if (!this.config) return html``;
 
@@ -181,7 +227,6 @@ export class HaTbaroCard extends LitElement {
     const cx = 150, r = 110, cy = 150;
     const minP = 950, maxP = 1050;
 
-    // Start and end angles based on semicircle or 270° gauge
     const startAngle = gaugeAngle === 180 ? Math.PI : Math.PI * 0.75;
     const endAngle = gaugeAngle === 180 ? Math.PI * 2 : Math.PI * 2.25;
 
@@ -191,33 +236,27 @@ export class HaTbaroCard extends LitElement {
     const iconSize = this.config.icon_size ?? 50;
     const iconYOffset = this.config.icon_y_offset ?? 0;
 
-    // Center icon horizontally and adjust vertically based on gauge type
     const iconX = cx - iconSize / 2;
     const baseIconY = gaugeAngle === 180 ? cy - r / 2 : cy - iconSize / 2;
     const iconY = baseIconY + iconYOffset;
 
-    // Label positions
     const labelY = gaugeAngle === 180 ? cy - 25 : cy + 60;
     const pressureY = gaugeAngle === 180 ? cy : cy + 85;
 
-    // Determine translations if missing
     const lang = this.config.language || this.hass?.locale?.language || 'en';
     if (!Object.keys(this._translations).length || !this._translations[lang]) {
       this._translations = HaTbaroCard._localeMap[lang] || HaTbaroCard._localeMap['en'];
     }
 
-    // Weather info for icon and label
     const weather = this.getWeatherInfo();
     const label = this._translations[weather.key] || weather.key;
 
-    // Draw colored segments of gauge
     const arcs = segments!.map(seg => {
       const aStart = startAngle + ((seg.from - minP) / (maxP - minP)) * (endAngle - startAngle);
       const aEnd = startAngle + ((seg.to - minP) / (maxP - minP)) * (endAngle - startAngle);
       return svg`<path d="${this.describeArc(cx, cy, r, aStart, aEnd)}" stroke="${seg.color}" stroke-width="${stroke_width}" fill="none" />`;
     });
 
-    // Tick marks
     const ticksHpa = [950, 960, 970, 980, 990, 1000, 1010, 1020, 1030, 1040, 1050];
     const TICK_WIDTH = 1;
     const TICK_LEN_OUT = 1;
@@ -232,7 +271,6 @@ export class HaTbaroCard extends LitElement {
       return svg`<line x1="${p1.x}" y1="${p1.y}" x2="${p2.x}" y2="${p2.y}" stroke="${tick_color}" stroke-width="${TICK_WIDTH}" />`;
     });
 
-    // Labels
     const labelHpa = [960, 980, 1000, 1020, 1040];
     const labels = labelHpa.map(p => {
       const display =
@@ -246,7 +284,6 @@ export class HaTbaroCard extends LitElement {
       return svg`<text x="${pt.x}" y="${pt.y}" font-size="0.9em" font-weight="bolder" class="label">${display}</text>`;
     });
 
-    // Needle
     const needle = (() => {
       const needleLength = gaugeAngle === 180 ? r - 5 : r - 35;
       const baseLength = gaugeAngle === 180 ? 80 : 16;
@@ -260,21 +297,28 @@ export class HaTbaroCard extends LitElement {
       return svg`<polygon points="${tip.x},${tip.y} ${baseL.x},${baseL.y} ${baseR.x},${baseR.y}" fill="${needle_color}" />${dot}`;
     })();
 
-    // Border arcs
     const outerR = r + stroke_width / 2 + 0.5;
     const innerR = r - stroke_width / 2 - 0.5;
     const borderOuter = svg`<path d="${this.describeArc(cx, cy, outerR, startAngle, endAngle)}" stroke="#000" stroke-width="1" fill="none" />`;
     const borderInner = svg`<path d="${this.describeArc(cx, cy, innerR, startAngle, endAngle)}" stroke="#000" stroke-width="1" fill="none" />`;
 
-    // Icon as SVG <image>
     const svgIcon = svg`<image href="${this.getIconDataUrl(weather.icon)}" x="${iconX}" y="${iconY}" width="${iconSize}" height="${iconSize}" />`;
 
-    // Render card
     const viewHeight = gaugeAngle === 180 ? 180 : 300;
     const clipHeight = gaugeAngle === 180 ? (size! / 300) * 180 : 'auto';
 
     return html`
-      <ha-card>
+      <ha-card
+        @click=${(e: MouseEvent) => this._handleAction(e, this.config.tap_action)}
+        @dblclick=${(e: MouseEvent) => this._handleAction(e, this.config.double_tap_action)}
+        @keydown=${(e: KeyboardEvent) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            this._handleAction(e as any, this.config.tap_action);
+          }
+        }}
+        tabindex="0"
+      >
         <div style="overflow:hidden;height:${clipHeight};"></div>
         ${svg`<svg viewBox="0 0 300 ${viewHeight}" style="max-width:${size}px;height:auto">
           ${this.config.border !== 'none' && (this.config.border === 'inner' || this.config.border === 'both') ? borderInner : nothing}
@@ -283,13 +327,13 @@ export class HaTbaroCard extends LitElement {
           ${ticks}
           ${labels}
           ${needle}
-          ${svgIcon}
+          ${this.config.show_icon ? svgIcon : nothing}
           ${this.config.show_label ? html`<text x="${cx}" y="${labelY}" font-size="14" class="label">${label}</text>` : nothing}
           <text x="${cx}" y="${pressureY}" font-size="22" font-weight="bold" class="label">
             ${this.config.unit === 'mm'
-                ? Math.round(pressure) + ' mm'
+                ? Math.round(pressure) + ' mmHg'
                 : this.config.unit === 'in'
-                  ? Math.round(pressure) + ' inHg'
+                  ? pressure.toFixed(2) + ' inHg'
                   : Math.round(pressure) + ' hPa'
             }
           </text>
