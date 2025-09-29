@@ -387,8 +387,9 @@ render() {
 
   const iconSize = this.config.icon_size ?? 50;           // default 50px
   const iconXCentered = cx - iconSize / 2;
-  const iconYOffset = this.config.icon_y_offset ?? (gaugeAngle === 180 ? -90 : 0);
-  const iconY = (gaugeAngle === 180 ? cy+12 : cy+5 ) + iconYOffset;
+  // Use 0 as baseline, only apply the user-configurable offset
+  const iconYOffset = this.config.icon_y_offset ?? 0;
+  const iconY = (gaugeAngle === 180 ? cy + 12 : cy + 5) + iconYOffset;
   const iconYCentered = (gaugeAngle === 180 ? cy + 12 : cy + 5) + iconYOffset;
 
   const svgIcon = svg`
@@ -421,7 +422,7 @@ render() {
   const clipHeight = gaugeAngle === 180 ? (size! / 300) * 180 : 'auto';
 
   return html`
-    <ha-card style="box-shadow:none;background:transparent;border:none;">
+    <ha-card>
     <div style="overflow:hidden;height:${clipHeight};"></div>
 
       ${svg`<svg viewBox="0 0 300 ${viewHeight}" style="max-width:${size}px;height:auto">
