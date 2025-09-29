@@ -284,7 +284,21 @@ export class HaTbaroCard extends LitElement {
           ${needle}
           ${svgIcon}
           ${this.config.show_label ? html`<text x="${cx}" y="${labelY}" font-size="14" class="label">${label}</text>` : nothing}
-          <text x="${cx}" y="${pressureY}" font-size="22" font-weight="bold" class="label">
+          <text
+            x="${cx}"
+            y="${pressureY}"
+            font-size="22"
+            font-weight="bold"
+            class="label"
+            style="cursor:pointer;"
+            @click=${() => this.hass.callService('browser_mod.popup', {
+                title: 'Sensor Entity',
+                card: {
+                    type: 'entity',
+                    entity: this.config.entity,
+                }
+            })}
+          >
             ${this.config.unit === 'mm'
                 ? Math.floor(pressure).toFixed(0) + ' mm'
                 : this.config.unit === 'in'
