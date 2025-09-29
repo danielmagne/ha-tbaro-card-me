@@ -285,7 +285,12 @@ export class HaTbaroCard extends LitElement {
           ${svgIcon}
           ${this.config.show_label ? html`<text x="${cx}" y="${labelY}" font-size="14" class="label">${label}</text>` : nothing}
           <text x="${cx}" y="${pressureY}" font-size="22" font-weight="bold" class="label">
-            ${this.config.unit === 'mm' ? pressure.toFixed(1) + ' mm' : this.config.unit === 'in' ? pressure.toFixed(2) + ' inHg' : pressure.toFixed(1) + ' hPa'}
+            ${this.config.unit === 'mm'
+                ? Math.round(pressure) + ' mm'
+                : this.config.unit === 'in'
+                  ? Math.round(pressure) + ' inHg'
+                  : Math.round(pressure) + ' hPa'
+            }
           </text>
         </svg>`}
       </ha-card>
