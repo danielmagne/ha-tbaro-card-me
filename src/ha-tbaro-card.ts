@@ -3,6 +3,7 @@
 import { LitElement, html, css, svg, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { unsafeSVG } from 'lit/directives/unsafe-svg.js';
+import { actionHandler } from "custom-card-helpers";
 
 // Import SVG icons as strings via rollup-plugin-string
 // @ts-ignore
@@ -57,6 +58,17 @@ export class HaTbaroCard extends LitElement {
 
   private _translations: Record<string, string> = {};
   private static _localeMap: Record<string, Record<string, string>> = { fr, en, ru, es, de };
+
+  private _handleAction() {
+    if (this.hass && this.config.entity) {
+      const event = new CustomEvent("hass-more-info", {
+        detail: { entityId: this.config.entity },
+        bubbles: true,
+        composed: true,
+      });
+      this.dispatchEvent(event);
+    }
+  }
 
   static styles = [
     css`
@@ -273,7 +285,15 @@ export class HaTbaroCard extends LitElement {
     const clipHeight = gaugeAngle === 180 ? (size! / 300) * 180 : 'auto';
     
     return html`
-      <ha-card style="position: relative;">
+        <ha-card
+          style="position:relative; cursor:pointer;"
+          .actionHandler=${actionHandler({hasHold:false, hasDoubleClick:false})}
+          @action=${(ev) => {
+            if (ev.detail.action === "tap") {
+              this._handleAction();
+            }
+          }}
+        >
         <!-- Clip container -->
         <div style="overflow:hidden;height:${clipHeight};"></div>
     
@@ -296,12 +316,6 @@ export class HaTbaroCard extends LitElement {
                 }
             </text>
           </svg>`}
-    
-        <!-- Full-card clickable overlay -->
-        <div
-          style="position:absolute; top:0; left:0; width:100%; height:100%; cursor:pointer;"
-          @click=${() => this.hass.moreInfo(this.config.entity)}
-        ></div>
       </ha-card>
     `;
   }
