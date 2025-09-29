@@ -273,7 +273,10 @@ export class HaTbaroCard extends LitElement {
     const clipHeight = gaugeAngle === 180 ? (size! / 300) * 180 : 'auto';
 
     return html`
-      <ha-card>
+      <ha-card
+        style="cursor: pointer;"
+        @click=${() => this.hass.moreInfo(this.config.entity)}
+      >
         <div style="overflow:hidden;height:${clipHeight};"></div>
         ${svg`<svg viewBox="0 0 300 ${viewHeight}" style="max-width:${size}px;height:auto">
           ${this.config.border !== 'none' && (this.config.border === 'inner' || this.config.border === 'both') ? borderInner : nothing}
@@ -286,10 +289,10 @@ export class HaTbaroCard extends LitElement {
           ${this.config.show_label ? html`<text x="${cx}" y="${labelY}" font-size="14" class="label">${label}</text>` : nothing}
           <text x="${cx}" y="${pressureY}" font-size="22" font-weight="bold" class="label">
             ${this.config.unit === 'mm'
-                ? Math.floor(pressure).toFixed(0) + ' mm'
+                ? Math.round(pressure) + ' mm'
                 : this.config.unit === 'in'
-                  ? Math.floor(pressure).toFixed(0) + ' inHg'
-                  : Math.floor(pressure).toFixed(0) + ' hPa'
+                  ? Math.round(pressure) + ' inHg'
+                  : Math.round(pressure) + ' hPa'
             }
           </text>
         </svg>`}
