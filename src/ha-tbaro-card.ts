@@ -138,53 +138,58 @@ export class HaTbaroCard extends LitElement {
     }
   }
 
-  private async _fetchHistory() {
-    try {
-      const endTime = new Date();
-      const startTime = new Date(endTime.getTime() - this.config.history_days * 24 * 60 * 60 * 1000);
-      const response = await this.hass.callWS({
-        type: 'history/history_during_period',
-        start_time: startTime.toISOString(),
-        end_time: endTime.toISOString(),
-        entity_ids: [this.config.entity],
-        significant_changes_only: false,
-        minimal_response: false,
-      });
-
-      const historyData = response[this.config.entity] || [];
-      if (historyData.length === 0) return;
-
-      // Convert all states to hPa using the same logic as rawHpa
-      const hpaHistory = historyData.map((state: any) => {
-        const val = parseFloat(state.state);
-        if (isNaN(val)) return null;
-        const unit = (state.attributes?.unit_of_measurement || 'hPa').toLowerCase().replace(/[^a-z]/g, '');
-        const factor = HaTbaroCard.UNIT_TO_HPA[unit] ?? 1;
-        return val * factor;
-      }).filter((v: number | null) => v !== null) as number[];
-
-      if (hpaHistory.length > 0 && this.config.show_min_max) {
-        this._minHpa = Math.min(...hpaHistory);
-        this._maxHpa = Math.max(...hpaHistory);
-      }
-
-      if (this.config.show_trend) {
-        // Get states from last 24h for average
-        const lastDayStart = new Date(endTime.getTime() - 24 * 60 * 60 * 1000);
-        const lastDayHpa = hpaHistory.filter((_, idx) => new Date(historyData[idx].last_changed) >= lastDayStart);
-        const avgLastDay = lastDayHpa.length > 0 ? lastDayHpa.reduce((a, b) => a + b, 0) / lastDayHpa.length : this.rawHpa;
-        const diff = this.rawHpa - avgLastDay;
-        this._trend = diff > 1 ? 'up' : diff < -1 ? 'down' : 'stable';
-      }
-
-      this._history = historyData;
-    } catch (error) {
-      console.error('Error fetching history for ha-tbaro-card:', error);
-      this._minHpa = undefined;
-      this._maxHpa = undefined;
-      this._trend = undefined;
+ private async _fetchHistory() {
+  try {
+    const days = this.config.history_days ?? 7; // Fallback to 7 if undefined
+    if (days <= 0) {
+      console.warn('Invalid history_days, using default of 7');
+      days = 7;
     }
+    const endTime = new Date();
+    const startTime = new Date(endTime.getTime() - days * 24 * 60 * 60 * 1000);
+    const response = await this.hass.callWS({
+      type: 'history/history_during_period',
+      start_time: startTime.toISOString(),
+      end_time: endTime.toISOString(),
+      entity_ids: [this.config.entity],
+      significant_changes_only: false,
+      minimal_response: false,
+    });
+
+    const historyData = response[this.config.entity] || [];
+    if (historyData.length === 0) return;
+
+    // Convert all states to hPa using the same logic as rawHpa
+    const hpaHistory = historyData.map((state: any) => {
+      const val = parseFloat(state.state);
+      if (isNaN(val)) return null;
+      const unit = (state.attributes?.unit_of_measurement || 'hPa').toLowerCase().replace(/[^a-z]/g, '');
+      const factor = HaTbaroCard.UNIT_TO_HPA[unit] ?? 1;
+      return val * factor;
+    }).filter((v: number | null) => v !== null) as number[];
+
+    if (hpaHistory.length > 0 && this.config.show_min_max) {
+      this._minHpa = Math.min(...hpaHistory);
+      this._maxHpa = Math.max(...hpaHistory);
+    }
+
+    if (this.config.show_trend) {
+      // Get states from last 24h for average
+      const lastDayStart = new Date(endTime.getTime() - 24 * 60 * 60 * 1000);
+      const lastDayHpa = hpaHistory.filter((_, idx) => new Date(historyData[idx].last_changed) >= lastDayStart);
+      const avgLastDay = lastDayHpa.length > 0 ? lastDayHpa.reduce((a, b) => a + b, 0) / lastDayHpa.length : this.rawHpa;
+      const diff = this.rawHpa - avgLastDay;
+      this._trend = diff > 1 ? 'up' : diff < -1 ? 'down' : 'stable';
+    }
+
+    this._history = historyData;
+  } catch (error) {
+    console.error('Error fetching history for ha-tbaro-card:', error);
+    this._minHpa = undefined;
+    this._maxHpa = undefined;
+    this._trend = undefined;
   }
+}
 
   private static readonly HPA_TO_MM  = 0.75006156;
   private static readonly HPA_TO_IN  = 0.02953;
