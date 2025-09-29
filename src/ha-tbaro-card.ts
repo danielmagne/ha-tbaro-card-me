@@ -394,14 +394,15 @@ render() {
     ? cy - r / 2             // semicircle: visually centered
     : cy - r + iconSize / 2; // full circle: visually centered
 
-  const iconX = cx - iconSize / 2;
+  // Reuse iconX if it exists; otherwise define it
+  let iconXPos = typeof iconX !== 'undefined' ? iconX : cx - iconSize / 2;
   const iconY = baseIconY + iconYOffset;
 
   // Render SVG icon
   const svgIcon = svg`
     <image 
       href="${this.getIconDataUrl(weather.icon)}" 
-      x="${iconX}" 
+      x="${iconXPos}" 
       y="${iconY}" 
       width="${iconSize}" 
       height="${iconSize}" 
