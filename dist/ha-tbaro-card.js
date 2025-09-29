@@ -64,7 +64,7 @@ const ct={attribute:!0,type:String,converter:y,reflect:!1,hasChanged:A},dt=(t=ct
     `})),w=[960,980,1e3,1020,1040].map((t=>{const e="mm"===this.config.unit?(t*ut.HPA_TO_MM).toFixed(0):"in"===this.config.unit?(t*ut.HPA_TO_IN).toFixed(2):t.toString(),s=p+(t-d)/100*(u-p),i=this.polar(h,c,74,s);return F`<text x="${i.x}" y="${i.y}" font-size="0.9em" font-weight="bolder" class="label">${e}</text>`})),x=(()=>{const t=180===n?105:75,i=180===n?80:16,r=this.polar(h,c,t,f),o=this.polar(h,c,i,f),a=f+Math.PI/2,l=180===n?7:5,d=o.x+Math.cos(a)*l,p=o.y+Math.sin(a)*l,u=o.x-Math.cos(a)*l,g=o.y-Math.sin(a)*l,$=180===n?q:F`<circle cx="${h}" cy="${c}" r="10" fill="${s}" />`;return F`
       <polygon points="${r.x},${r.y} ${d},${p} ${u},${g}" fill="${e}" />
       ${$}
-      `})(),M=l+a/2+.5,E=l+a/2+.5,P=l-a/2-.5,k=F`<path d="${this.describeArc(h,c,E,p,u)}" stroke="#000" stroke-width="1" fill="none" />`,S=F`<path d="${this.describeArc(h,c,P,p,u)}" stroke="#000" stroke-width="1" fill="none" />`;F`<path d="${this.describeArc(h,c,M,p,u)}" stroke="#000" stroke-width="1" fill="none" />`;const L=this.config.icon_size??50,O=h-L/2,T=this.config.icon_y_offset??(180===n?-90:0),H=(180===n?162:155)+T,U=(180===n?162:155)+T,N=F`
+      `})(),M=l+a/2+.5,E=l+a/2+.5,P=l-a/2-.5,k=F`<path d="${this.describeArc(h,c,E,p,u)}" stroke="#000" stroke-width="1" fill="none" />`,S=F`<path d="${this.describeArc(h,c,P,p,u)}" stroke="#000" stroke-width="1" fill="none" />`;F`<path d="${this.describeArc(h,c,M,p,u)}" stroke="#000" stroke-width="1" fill="none" />`;const L=this.config.icon_size??50,O=h-L/2,T=this.config.icon_y_offset??0,H=(180===n?162:155)+T,U=(180===n?162:155)+T,N=F`
     <image 
       href="${this.getIconDataUrl(y.icon)}" 
       x="${O}" 
@@ -85,7 +85,7 @@ const ct={attribute:!0,type:String,converter:y,reflect:!1,hasChanged:A},dt=(t=ct
     "
   ></ha-icon>
   `;return B`
-    <ha-card style="box-shadow:none;background:transparent;border:none;">
+    <ha-card>
     <div style="overflow:hidden;height:${180===n?i/300*180:"auto"};"></div>
 
       ${F`<svg viewBox="0 0 300 ${180===n?180:300}" style="max-width:${i}px;height:auto">
