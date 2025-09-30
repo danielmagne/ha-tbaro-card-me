@@ -61,7 +61,7 @@ interface BaroCardConfig {
   min_max_marker_size?: number;
   major_tick_width?: number;
   major_tick_length?: number;
-  name?: string; // New property to override entity name
+  name?: string;
 }
 
 @customElement('ha-tbaro-card')
@@ -133,7 +133,7 @@ export class HaTbaroCard extends LitElement {
       major_tick_length: 2,
       tap_action: { action: 'more-info' },
       double_tap_action: { action: 'none' },
-      name: config.name || config.entity, // Default to entity ID if no name provided
+      name: config.name || config.entity,
       segments: [
         { from: 950, to: 980, color: '#3399ff' },
         { from: 980, to: 1000, color: '#4CAF50' },
@@ -297,7 +297,7 @@ export class HaTbaroCard extends LitElement {
 
     evt.stopPropagation();
 
-    const config = { ...actionConfig };
+    const config = { ...actionConfig};
 
     switch (config.action) {
       case 'more-info':
@@ -350,8 +350,8 @@ export class HaTbaroCard extends LitElement {
     const iconY = baseIconY + iconYOffset;
 
     const labelY = gaugeAngle === 180 ? cy - 25 : cy + 60;
-    const pressureY = gaugeAngle === 180 ? cy : cy + 85;
-    const entityNameY = pressureY + 20; // Position below pressure value
+    const pressureY = gaugeAngle === 180 ? cy - 10 : cy - 10; // Moved up 10 pixels
+    const entityNameY = gaugeAngle === 180 ? cy + 70 : cy + 70; // Aligned near bottom, adjusted upward
 
     const lang = this.config.language || this.hass?.locale?.language || 'en';
     if (!Object.keys(this._translations).length || !this._translations[lang]) {
@@ -446,8 +446,8 @@ export class HaTbaroCard extends LitElement {
 
     const trendIndicator = (() => {
       if (!this.config.show_trend || this._trend === undefined) return nothing;
-      const trendX = cx + 58;
-      const trendY = pressureY;
+      const trendX = cx - 40; // Adjusted to left of pressure value
+      const trendY = pressureY; // Aligned with pressure value
       const size = 12;
       const halfSize = size / 2;
 
@@ -502,7 +502,7 @@ export class HaTbaroCard extends LitElement {
                   : Math.round(pressure) + ' hPa'
             }
           </text>
-          <text x="${cx}" y="${entityNameY}" font-size="14" class="label">${name}</text> <!-- Entity name -->
+          <text x="${cx}" y="${entityNameY}" font-size="12" class="label">${name}</text>
           ${trendIndicator}
         </svg>`}
       </ha-card>
