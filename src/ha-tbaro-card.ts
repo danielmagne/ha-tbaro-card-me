@@ -132,7 +132,7 @@ export class HaTbaroCard extends LitElement {
       show_trend: true,
       history_days: 7,
       unfilled_color: '#333333',
-      min_max_marker_size: 8,
+      min_max_marker_size: 5, // Reduced from 8 to 5 for smaller arrows
       major_tick_width: 1.5,
       major_tick_length: 2,
       tap_action: { action: 'more-info' },
@@ -183,14 +183,31 @@ export class HaTbaroCard extends LitElement {
         return;
       }
 
+      let loggedNull = false;
+      let loggedUnknown = false;
+
       const hpaHistory = historyData.map((state: any) => {
         if (!state || !state.s || (typeof state.s !== 'string' && typeof state.s !== 'number')) {
-          console.warn('Skipping invalid state entry:', JSON.stringify(state, null, 2));
+          if (state.s === null && !loggedNull) {
+            console.warn('Skipping invalid state entry (null):', JSON.stringify(state, null, 2));
+            loggedNull = true;
+          } else if (state.s === 'unknown' && !loggedUnknown) {
+            console.warn('Skipping invalid state entry (unknown):', JSON.stringify(state, null, 2));
+            loggedUnknown = true;
+          }
           return null;
         }
         const val = parseFloat(state.s);
         if (isNaN(val)) {
-          console.warn('Invalid state value:', JSON.stringify(state, null, 2));
+          if (!loggedUnknown && state.s === 'unknown') {
+            console.warn('Invalid state value (unknown):', JSON.stringify(state, null, 2));
+            loggedUnknown = true;
+          } else if (!loggedNull && state.s === null) {
+            console.warn('Invalid state value (null):', JSON.stringify(state, null, 2));
+            loggedNull = true;
+          } else {
+            console.warn('Invalid state value:', JSON.stringify(state, null, 2));
+          }
           return null;
         }
         const unit = (state.a?.unit_of_measurement || 'hPa').toLowerCase().replace(/[^a-z]/g, '');
@@ -333,7 +350,7 @@ export class HaTbaroCard extends LitElement {
 
     const pressure = this.pressure;
     const { tick_color, size, segments, angle: gaugeAngle = 270, border = 'outer', stroke_width = 20,
-            major_tick_width = 1.5, major_tick_length = 2, min_max_marker_size = 8 } = this.config;
+            major_tick_width = 1.5, major_tick_length = 2, min_max_marker_size = 5 } = this.config; // Using config value
     const cx = 150, r = 110, cy = 150;
     const minP = 950, maxP = 1050;
 
@@ -424,14 +441,15 @@ export class HaTbaroCard extends LitElement {
       const minAngle = startAngle + ((clampedMin - minP) / (maxP - minP)) * (endAngle - startAngle);
       const maxAngle = startAngle + ((clampedMax - minP) / (maxP - minP)) * (endAngle - startAngle);
       
-      const markerSize = min_max_marker_size;
-      const rPointer = r + stroke_width / 2 + 2;
-      
-      // Create arrow shape
+      const markerSize = min_max_marker_size; // Use config value, default 5
+      const rOuter = r + stroke_width / 2 + 2; // Start at the outer edge
+      const rInner = rOuter - markerSize; // Point inward toward the center
+
+      // Create small inward-pointing arrow (triangle pointing down)
       const createArrow = (angle: number, color: string) => {
-        const tip = this.polar(cx, cy, rPointer + markerSize, angle);
-        const base1 = this.polar(cx, cy, rPointer, angle - 0.2);
-        const base2 = this.polar(cx, cy, rPointer, angle + 0.2);
+        const tip = this.polar(cx, cy, rInner, angle); // Tip points inward
+        const base1 = this.polar(cx, cy, rOuter, angle - 0.2); // Base points outward
+        const base2 = this.polar(cx, cy, rOuter, angle + 0.2); // Base points outward
         return svg`
           <polygon points="${tip.x},${tip.y} ${base1.x},${base1.y} ${base2.x},${base2.y}" 
                    fill="${color}" stroke="${color}" stroke-width="0.5" />
