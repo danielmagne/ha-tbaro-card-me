@@ -177,6 +177,8 @@ export class HaTbaroCard extends LitElement {
       const historyData = response[this.config.entity] || [];
       if (historyData.length === 0) {
         console.warn('No history data for', this.config.entity);
+        this._minHpa = this.rawHpa; // Fallback to current value if no history
+        this._maxHpa = this.rawHpa;
         return;
       }
 
@@ -188,10 +190,14 @@ export class HaTbaroCard extends LitElement {
         return val * factor;
       }).filter((v: number | null) => v !== null) as number[];
 
+      console.log('hpaHistory:', hpaHistory); // Debug log
       if (hpaHistory.length > 0 && this.config.show_min_max) {
         this._minHpa = Math.min(...hpaHistory);
         this._maxHpa = Math.max(...hpaHistory);
         console.log('Min/Max set:', this._minHpa, this._maxHpa);
+      } else {
+        this._minHpa = this.rawHpa; // Fallback if no valid history
+        this._maxHpa = this.rawHpa;
       }
 
       if (this.config.show_trend) {
@@ -205,8 +211,8 @@ export class HaTbaroCard extends LitElement {
       this._history = historyData;
     } catch (error) {
       console.error('Error fetching history for ha-tbaro-card:', error);
-      this._minHpa = undefined;
-      this._maxHpa = undefined;
+      this._minHpa = this.rawHpa; // Fallback on error
+      this._maxHpa = this.rawHpa;
       this._trend = undefined;
     }
   }
@@ -317,7 +323,7 @@ export class HaTbaroCard extends LitElement {
 
     const pressure = this.pressure;
     const { tick_color, size, segments, angle: gaugeAngle = 270, border = 'outer', stroke_width = 20,
-            major_tick_width = 1.5, major_tick_length = 2 } = this.config;
+            major_tick_width = 1.5, major_tick_length = 2, min_max_marker_size = 8 } = this.config;
     const cx = 150, r = 110, cy = 150;
     const minP = 950, maxP = 1050;
 
@@ -408,7 +414,7 @@ export class HaTbaroCard extends LitElement {
       const minAngle = startAngle + ((clampedMin - minP) / (maxP - minP)) * (endAngle - startAngle);
       const maxAngle = startAngle + ((clampedMax - minP) / (maxP - minP)) * (endAngle - startAngle);
       
-      const markerSize = this.config.min_max_marker_size ?? 8;
+      const markerSize = min_max_marker_size;
       const rPointer = r + stroke_width / 2 + 2;
       
       const createTriangle = (angle: number, color: string, label: string) => {
