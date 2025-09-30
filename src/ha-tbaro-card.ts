@@ -55,7 +55,7 @@ interface BaroCardConfig {
   icon_y_offset?: number;
   angle?: 180 | 270;
   border?: 'none' | 'outer' | 'inner' | 'both';
-  show_border?: boolean; // Added to support your config
+  show_border?: boolean;
   segments?: Segment[];
   tap_action?: HassActionConfig;
   double_tap_action?: HassActionConfig;
@@ -122,7 +122,7 @@ export class HaTbaroCard extends LitElement {
       show_icon: true,
       show_label: true,
       stroke_width: 20,
-      border: config.show_border ? 'outer' : 'none', // Map show_border to border
+      border: config.show_border ? 'outer' : 'none',
       size: 300,
       icon_size: 50,
       icon_y_offset: 0,
@@ -137,9 +137,9 @@ export class HaTbaroCard extends LitElement {
       double_tap_action: { action: 'none' },
       segments: [
         { from: 950, to: 980, color: '#3399ff' },
-        { from: 980, to: 1000, color: '#4CAF50' },
-        { from: 1000, to: 1020, color: '#FFD700' },
-        { from: 1020, to: 1050, color: '#FF4500' }
+        { from: 980, to 1000, color: '#4CAF50' },
+        { from: 1000, to 1020, color: '#FFD700' },
+        { from: 1020, to 1050, color: '#FF4500' }
       ],
       ...config
     };
@@ -189,7 +189,7 @@ export class HaTbaroCard extends LitElement {
       if (hpaHistory.length > 0 && this.config.show_min_max) {
         this._minHpa = Math.min(...hpaHistory);
         this._maxHpa = Math.max(...hpaHistory);
-        console.log('Min/Max set:', this._minHpa, this._maxHpa); // Debug log
+        console.log('Min/Max set:', this._minHpa, this._maxHpa);
       }
 
       if (this.config.show_trend) {
@@ -314,7 +314,7 @@ export class HaTbaroCard extends LitElement {
     if (!this.config) return html``;
 
     const pressure = this.pressure;
-    const { needle_color, tick_color, size, segments, angle: gaugeAngle = 270, border = 'outer', stroke_width = 20 } = this.config;
+    const { tick_color, size, segments, angle: gaugeAngle = 270, border = 'outer', stroke_width = 20 } = this.config;
     const cx = 150, r = 110, cy = 150;
     const minP = 950, maxP = 1050;
 
@@ -328,7 +328,7 @@ export class HaTbaroCard extends LitElement {
     const iconYOffset = this.config.icon_y_offset ?? 0;
 
     const iconX = cx - iconSize / 2;
-    const baseIconY = gaugeAngle === 180 ? cy - r / 2 : cy - iconSize / 2;
+    const baseIconY = gaugeAngle === 180 ? cy - r / 2 - 20 : cy - iconSize / 2; // Adjusted for 180° to move up
     const iconY = baseIconY + iconYOffset;
 
     const labelY = gaugeAngle === 180 ? cy - 25 : cy + 60;
@@ -380,7 +380,7 @@ export class HaTbaroCard extends LitElement {
       return svg`<line x1="${p1.x}" y1="${p1.y}" x2="${p2.x}" y2="${p2.y}" stroke="${tick_color}" stroke-width="${TICK_WIDTH}" />`;
     });
 
-    const labelHpa = [950, 960, 970, 980, 990, 1000, 1010, 1020, 1030, 1040, 1050]; // Every 10 hPa
+    const labelHpa = [950, 960, 970, 980, 990, 1000, 1010, 1020, 1030, 1040, 1050];
     const labels = labelHpa.map(p => {
       const display =
         this.config.unit === 'mm'
@@ -389,22 +389,9 @@ export class HaTbaroCard extends LitElement {
             ? (p * HaTbaroCard.HPA_TO_IN).toFixed(2)
             : p.toString();
       const a = startAngle + ((p - minP) / (maxP - minP)) * (endAngle - startAngle);
-      const pt = this.polar(cx, cy, r - 20, a); // Closer to arc (was r - 36)
-      return svg`<text x="${pt.x}" y="${pt.y}" font-size="0.6em" class="label">${display}</text>`; // Smaller, non-bold
+      const pt = this.polar(cx, cy, r - 20, a);
+      return svg`<text x="${pt.x}" y="${pt.y}" font-size="0.6em" class="label">${display}</text>`;
     });
-
-    const needle = (() => {
-      const needleLength = gaugeAngle === 180 ? r - 5 : r - 35;
-      const baseLength = gaugeAngle === 180 ? 80 : 16;
-      const tip = this.polar(cx, cy, needleLength, valueAngle);
-      const base = this.polar(cx, cy, baseLength, valueAngle);
-      const sideAngle = valueAngle + Math.PI / 2;
-      const offset = gaugeAngle === 180 ? 7 : 5;
-      const baseL = { x: base.x + Math.cos(sideAngle) * offset, y: base.y + Math.sin(sideAngle) * offset };
-      const baseR = { x: base.x - Math.cos(sideAngle) * offset, y: base.y - Math.sin(sideAngle) * offset };
-      const dot = gaugeAngle === 180 ? nothing : svg`<circle cx="${cx}" cy="${cy}" r="10" fill="${tick_color}" />`;
-      return svg`<polygon points="${tip.x},${tip.y} ${baseL.x},${baseL.y} ${baseR.x},${baseR.y}" fill="${needle_color}" />${dot}`;
-    })();
 
     const outerR = r + stroke_width / 2 + 0.5;
     const innerR = r - stroke_width / 2 - 0.5;
@@ -413,7 +400,6 @@ export class HaTbaroCard extends LitElement {
 
     const svgIcon = svg`<image href="${this.getIconDataUrl(weather.icon)}" x="${iconX}" y="${iconY}" width="${iconSize}" height="${iconSize}" />`;
 
-    // Enhanced Min/Max markers with triangular pointers
     const minMaxMarkers = (() => {
       if (!this.config.show_min_max || this._minHpa === undefined || this._maxHpa === undefined) return nothing;
       const clampedMin = Math.max(minP, Math.min(maxP, this._minHpa));
@@ -422,7 +408,7 @@ export class HaTbaroCard extends LitElement {
       const maxAngle = startAngle + ((clampedMax - minP) / (maxP - minP)) * (endAngle - startAngle);
       
       const markerSize = this.config.min_max_marker_size ?? 8;
-      const rPointer = r + stroke_width / 2 + 2; // Adjusted for smaller size
+      const rPointer = r + stroke_width / 2 + 2;
       
       const createTriangle = (angle: number, color: string, label: string) => {
         const tip = this.polar(cx, cy, rPointer + markerSize, angle);
@@ -443,7 +429,6 @@ export class HaTbaroCard extends LitElement {
       `;
     })();
 
-    // Trend indicator with +/- sign
     const trendIndicator = (() => {
       if (!this.config.show_trend || this._trend === undefined) return nothing;
       const trendX = cx + 58;
@@ -489,7 +474,6 @@ export class HaTbaroCard extends LitElement {
           ${this.config.border === 'outer' || this.config.border === 'both' ? borderOuter : nothing}
           ${ticks}
           ${labels}
-          ${needle}
           ${minMaxMarkers}
           ${this.config.show_icon ? svgIcon : nothing}
           ${this.config.show_label ? svg`<text x="${cx}" y="${labelY}" font-size="14" class="label">${label}</text>` : nothing}
