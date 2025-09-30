@@ -143,10 +143,10 @@ export class HaTbaroCard extends LitElement {
       double_tap_action: { action: 'none' },
       segments: [
         { from: 950, to: 980, color: '#3399ff' },
-        { from: 980, to 1000, color: '#4CAF50' },
-        { from: 1000, to 1020, color: '#FFD700' },
-        { from: 1020, to 1050, color: '#FF4500' }
-      ],
+        { from: 980, to: 1000, color: '#4CAF50' },
+        { from: 1000, to: 1020, color: '#FFD700' },
+        { from: 1020, to: 1050, color: '#FF4500' }
+     ],
       ...config
     };
   }
