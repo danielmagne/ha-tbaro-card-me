@@ -127,7 +127,7 @@ export class HaTbaroCard extends LitElement {
       icon_size: 50,
       icon_y_offset: 0,
       angle: 270,
-      unit: 'hpa', // Fixed to match type definition
+      unit: 'hpa',
       show_min_max: true,
       show_trend: true,
       history_days: 7,
