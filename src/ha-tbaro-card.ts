@@ -20,11 +20,7 @@ import de from '../locales/de.json';
 
 // Print version to console
 import { version, name } from '../package.json';
-export const printVersionToConsole = () => console.info(
-  `%c  ${name.toUpperCase()}  %c  Version ${version}  `,
-  'color: white; font-weight: bold; background: crimson',
-  'color: #000; font-weight: bold; background: #ddd',
-);
+export const printVersionToConsole = () => {};
 printVersionToConsole();
 
 interface Segment {
@@ -111,7 +107,6 @@ export class HaTbaroCard extends LitElement {
 
     const lang = (config.language || this.hass?.locale?.language || 'en').toLowerCase();
     if (!HaTbaroCard._localeMap[lang]) {
-      console.warn(`No translation for "${lang}", fallback to English`);
       this._translations = HaTbaroCard._localeMap['en'];
     } else {
       this._translations = HaTbaroCard._localeMap[lang];
@@ -132,7 +127,7 @@ export class HaTbaroCard extends LitElement {
       show_trend: true,
       history_days: 7,
       unfilled_color: '#333333',
-      min_max_marker_size: 5, // Default size
+      min_max_marker_size: 5,
       major_tick_width: 1.5,
       major_tick_length: 2,
       tap_action: { action: 'more-info' },
@@ -160,7 +155,6 @@ export class HaTbaroCard extends LitElement {
     try {
       let days = this.config.history_days ?? 7;
       if (days <= 0) {
-        console.warn('Invalid history_days, using default of 7');
         days = 7;
       }
       const endTime = new Date();
@@ -175,9 +169,7 @@ export class HaTbaroCard extends LitElement {
       });
 
       const historyData = response[this.config.entity] || [];
-      console.log('Raw history data:', JSON.stringify(historyData, null, 2)); // Log full data with formatting
       if (historyData.length === 0) {
-        console.warn('No history data for', this.config.entity);
         this._minHpa = this.rawHpa;
         this._maxHpa = this.rawHpa;
         return;
@@ -189,10 +181,8 @@ export class HaTbaroCard extends LitElement {
       const hpaHistory = historyData.map((state: any) => {
         if (!state || !state.s || (typeof state.s !== 'string' && typeof state.s !== 'number')) {
           if (state.s === null && !loggedNull) {
-            console.warn('Skipping invalid state entry (null):', JSON.stringify(state, null, 2));
             loggedNull = true;
           } else if (state.s === 'unknown' && !loggedUnknown) {
-            console.warn('Skipping invalid state entry (unknown):', JSON.stringify(state, null, 2));
             loggedUnknown = true;
           }
           return null;
@@ -200,10 +190,8 @@ export class HaTbaroCard extends LitElement {
         const val = parseFloat(state.s);
         if (isNaN(val)) {
           if (!loggedUnknown && state.s === 'unknown') {
-            console.warn('Invalid state value (unknown):', JSON.stringify(state, null, 2));
             loggedUnknown = true;
           } else if (!loggedNull && state.s === null) {
-            console.warn('Invalid state value (null):', JSON.stringify(state, null, 2));
             loggedNull = true;
           }
           return null;
@@ -211,17 +199,13 @@ export class HaTbaroCard extends LitElement {
         const unit = (state.a?.unit_of_measurement || 'hPa').toLowerCase().replace(/[^a-z]/g, '');
         const factor = HaTbaroCard.UNIT_TO_HPA[unit] ?? 1;
         const hpaValue = val * factor;
-        console.log(`Converted ${val} ${unit} to ${hpaValue} hPa`);
         return hpaValue;
       }).filter((v: number | null) => v !== null) as number[];
 
-      console.log('hpaHistory:', hpaHistory); // Debug processed history
       if (hpaHistory.length > 0 && this.config.show_min_max) {
         this._minHpa = Math.min(...hpaHistory);
         this._maxHpa = Math.max(...hpaHistory);
-        console.log('Min/Max set:', this._minHpa, this._maxHpa);
       } else {
-        console.warn('No valid history data found, falling back to current value');
         this._minHpa = this.rawHpa;
         this._maxHpa = this.rawHpa;
       }
@@ -236,7 +220,6 @@ export class HaTbaroCard extends LitElement {
 
       this._history = historyData;
     } catch (error) {
-      console.error('Error fetching history for ha-tbaro-card:', error);
       this._minHpa = this.rawHpa;
       this._maxHpa = this.rawHpa;
       this._trend = undefined;
@@ -339,7 +322,6 @@ export class HaTbaroCard extends LitElement {
         }
         break;
       default:
-        console.warn(`Unsupported action: ${config.action}`);
     }
   }
 
@@ -439,15 +421,14 @@ export class HaTbaroCard extends LitElement {
       const minAngle = startAngle + ((clampedMin - minP) / (maxP - minP)) * (endAngle - startAngle);
       const maxAngle = startAngle + ((clampedMax - minP) / (maxP - minP)) * (endAngle - startAngle);
       
-      const markerSize = min_max_marker_size; // Use config value, default 5
-      const rOuter = r + stroke_width / 2 + 2; // Start at the outer edge
-      const rInner = rOuter - markerSize * 1.5; // Extend inward for a pronounced tip
+      const markerSize = min_max_marker_size;
+      const rOuter = r + stroke_width / 2 + 2;
+      const rInner = rOuter - markerSize * 1.5;
 
-      // Create very narrow inward-pointing arrow (4 hPa width)
       const createArrow = (angle: number, color: string) => {
-        const tip = this.polar(cx, cy, rInner, angle); // Tip points inward
-        const base1 = this.polar(cx, cy, rOuter, angle - 0.05); // Narrower base
-        const base2 = this.polar(cx, cy, rOuter, angle + 0.05); // Narrower base
+        const tip = this.polar(cx, cy, rInner, angle);
+        const base1 = this.polar(cx, cy, rOuter, angle - 0.05);
+        const base2 = this.polar(cx, cy, rOuter, angle + 0.05);
         return svg`
           <polygon points="${tip.x},${tip.y} ${base1.x},${base1.y} ${base2.x},${base2.y}" 
                    fill="${color}" stroke="${color}" stroke-width="0.5" />
@@ -455,8 +436,8 @@ export class HaTbaroCard extends LitElement {
       };
       
       return svg`
-        ${createArrow(minAngle, '#5599ff')} <!-- Blue arrow for min -->
-        ${createArrow(maxAngle, '#ff7755')} <!-- Red arrow for max -->
+        ${createArrow(minAngle, '#5599ff')}
+        ${createArrow(maxAngle, '#ff7755')}
       `;
     })();
 
@@ -464,22 +445,24 @@ export class HaTbaroCard extends LitElement {
       if (!this.config.show_trend || this._trend === undefined) return nothing;
       const trendX = cx + 58;
       const trendY = pressureY;
-      
-      let symbol = '';
-      let color = tick_color;
-      
+      const size = 12; // Size of the triangle
+      const halfSize = size / 2;
+
+      let points = '';
+      let fillColor = tick_color;
+
       if (this._trend === 'up') {
-        symbol = '+';
-        color = '#5599ff';
+        points = `${trendX},${trendY - halfSize} ${trendX - halfSize},${trendY + halfSize} ${trendX + halfSize},${trendY + halfSize}`;
+        fillColor = '#5599ff';
       } else if (this._trend === 'down') {
-        symbol = '−';
-        color = '#ff7755';
-      } else {
-        symbol = '=';
-        color = '#888';
+        points = `${trendX},${trendY + halfSize} ${trendX - halfSize},${trendY - halfSize} ${trendX + halfSize},${trendY - halfSize}`;
+        fillColor = '#ff7755';
+      } else { // stable
+        points = `${trendX - halfSize},${trendY - halfSize} ${trendX + halfSize},${trendY - halfSize} ${trendX},${trendY + halfSize}`;
+        fillColor = '#888';
       }
-      
-      return svg`<text x="${trendX}" y="${trendY}" class="trend-indicator" fill="${color}">${symbol}</text>`;
+
+      return svg`<polygon points="${points}" fill="${fillColor}" stroke="${fillColor}" stroke-width="0.5" />`;
     })();
 
     const viewHeight = gaugeAngle === 180 ? 180 : 300;
