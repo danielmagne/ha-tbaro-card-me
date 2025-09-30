@@ -175,7 +175,7 @@ export class HaTbaroCard extends LitElement {
       });
 
       const historyData = response[this.config.entity] || [];
-      console.log('Raw history data:', historyData); // Debug raw data
+      console.log('Raw history data:', JSON.stringify(historyData, null, 2)); // Log full data with formatting
       if (historyData.length === 0) {
         console.warn('No history data for', this.config.entity);
         this._minHpa = this.rawHpa;
@@ -184,9 +184,13 @@ export class HaTbaroCard extends LitElement {
       }
 
       const hpaHistory = historyData.map((state: any) => {
+        if (!state || !state.state || (typeof state.state !== 'string' && typeof state.state !== 'number')) {
+          console.warn('Skipping invalid state entry:', JSON.stringify(state, null, 2));
+          return null;
+        }
         const val = parseFloat(state.state);
         if (isNaN(val)) {
-          console.warn('Invalid state value:', state.state);
+          console.warn('Invalid state value:', JSON.stringify(state, null, 2));
           return null;
         }
         const unit = (state.attributes?.unit_of_measurement || 'hPa').toLowerCase().replace(/[^a-z]/g, '');
@@ -202,6 +206,7 @@ export class HaTbaroCard extends LitElement {
         this._maxHpa = Math.max(...hpaHistory);
         console.log('Min/Max set:', this._minHpa, this._maxHpa);
       } else {
+        console.warn('No valid history data found, falling back to current value');
         this._minHpa = this.rawHpa;
         this._maxHpa = this.rawHpa;
       }
