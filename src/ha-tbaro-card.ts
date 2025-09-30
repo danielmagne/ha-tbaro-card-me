@@ -63,6 +63,8 @@ interface BaroCardConfig {
   history_days?: number;
   unfilled_color?: string;
   min_max_marker_size?: number;
+  major_tick_width?: number;
+  major_tick_length?: number;
 }
 
 @customElement('ha-tbaro-card')
@@ -125,19 +127,21 @@ export class HaTbaroCard extends LitElement {
       icon_size: 50,
       icon_y_offset: 0,
       angle: 270,
-      unit: 'hpa',
+      unit: 'hPa',
       show_min_max: true,
       show_trend: true,
       history_days: 7,
       unfilled_color: '#333333',
       min_max_marker_size: 8,
+      major_tick_width: 1.5,
+      major_tick_length: 2,
       tap_action: { action: 'more-info' },
       double_tap_action: { action: 'none' },
       segments: [
-          { from: 950, to: 980, color: '#3399ff' },
-          { from: 980, to: 1000, color: '#4CAF50' },
-          { from: 1000, to: 1020, color: '#FFD700' },
-          { from: 1020, to: 1050, color: '#FF4500' }
+        { from: 950, to: 980, color: '#3399ff' },
+        { from: 980, to: 1000, color: '#4CAF50' },
+        { from: 1000, to: 1020, color: '#FFD700' },
+        { from: 1020, to: 1050, color: '#FF4500' }
       ],
       ...config
     };
@@ -312,7 +316,8 @@ export class HaTbaroCard extends LitElement {
     if (!this.config) return html``;
 
     const pressure = this.pressure;
-    const { tick_color, size, segments, angle: gaugeAngle = 270, border = 'outer', stroke_width = 20 } = this.config;
+    const { tick_color, size, segments, angle: gaugeAngle = 270, border = 'outer', stroke_width = 20,
+            major_tick_width = 1.5, major_tick_length = 2 } = this.config;
     const cx = 150, r = 110, cy = 150;
     const minP = 950, maxP = 1050;
 
@@ -365,17 +370,15 @@ export class HaTbaroCard extends LitElement {
     });
 
     const ticksHpa = [950, 960, 970, 980, 990, 1000, 1010, 1020, 1030, 1040, 1050];
-    const TICK_WIDTH = 1;
-    const TICK_LEN_OUT = 1;
     const TICK_LEN_IN = 2;
 
-    const ticks = ticksHpa.map(p => {
+    const majorTicks = ticksHpa.map(p => {
       const a = startAngle + ((p - minP) / (maxP - minP)) * (endAngle - startAngle);
-      const rOuter = r + stroke_width / 2 + TICK_LEN_OUT;
+      const rOuter = r + stroke_width / 2 + major_tick_length;
       const rInner = r - stroke_width / 2 - TICK_LEN_IN;
       const p1 = this.polar(cx, cy, rOuter, a);
       const p2 = this.polar(cx, cy, rInner, a);
-      return svg`<line x1="${p1.x}" y1="${p1.y}" x2="${p2.x}" y2="${p2.y}" stroke="${tick_color}" stroke-width="${TICK_WIDTH}" />`;
+      return svg`<line x1="${p1.x}" y1="${p1.y}" x2="${p2.x}" y2="${p2.y}" stroke="${tick_color}" stroke-width="${major_tick_width}" />`;
     });
 
     const labelHpa = [950, 960, 970, 980, 990, 1000, 1010, 1020, 1030, 1040, 1050];
@@ -470,7 +473,7 @@ export class HaTbaroCard extends LitElement {
           ${filledArcs}
           ${this.config.border !== 'none' && (this.config.border === 'inner' || this.config.border === 'both') ? borderInner : nothing}
           ${this.config.border === 'outer' || this.config.border === 'both' ? borderOuter : nothing}
-          ${ticks}
+          ${majorTicks}
           ${labels}
           ${minMaxMarkers}
           ${this.config.show_icon ? svgIcon : nothing}
