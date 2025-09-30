@@ -444,8 +444,8 @@ export class HaTbaroCard extends LitElement {
     const trendIndicator = (() => {
       if (!this.config.show_trend || this._trend === undefined) return nothing;
       const trendX = cx + 58;
-      const trendY = pressureY;
-      const size = 12; // Size of the triangle
+      const trendY = pressureY - 11; // Adjusted to center with pressure text (font-size 22 / 2)
+      const size = 12;
       const halfSize = size / 2;
 
       let points = '';
