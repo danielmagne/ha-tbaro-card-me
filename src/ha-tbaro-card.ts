@@ -350,8 +350,8 @@ export class HaTbaroCard extends LitElement {
     const iconY = baseIconY + iconYOffset;
 
     const labelY = gaugeAngle === 180 ? cy - 25 : cy + 60;
-    const pressureY = gaugeAngle === 180 ? cy - 10 : cy - 10; // Moved up 10 pixels
-    const entityNameY = gaugeAngle === 180 ? cy + 70 : cy + 70; // Aligned near bottom, adjusted upward
+    const pressureY = gaugeAngle === 180 ? cy + 50 : cy + 50; // Unified Y for horizontal row
+    const entityNameY = pressureY; // Same Y as pressure value
 
     const lang = this.config.language || this.hass?.locale?.language || 'en';
     if (!Object.keys(this._translations).length || !this._translations[lang]) {
@@ -446,8 +446,8 @@ export class HaTbaroCard extends LitElement {
 
     const trendIndicator = (() => {
       if (!this.config.show_trend || this._trend === undefined) return nothing;
-      const trendX = cx - 40; // Adjusted to left of pressure value
-      const trendY = pressureY; // Aligned with pressure value
+      const trendX = cx - 40; // Left of pressure value
+      const trendY = pressureY; // Same Y as pressure value
       const size = 12;
       const halfSize = size / 2;
 
@@ -502,7 +502,7 @@ export class HaTbaroCard extends LitElement {
                   : Math.round(pressure) + ' hPa'
             }
           </text>
-          <text x="${cx}" y="${entityNameY}" font-size="12" class="label">${name}</text>
+          <text x="${cx + 60}" y="${entityNameY}" font-size="12" class="label">${name}</text> <!-- Moved to right -->
           ${trendIndicator}
         </svg>`}
       </ha-card>
