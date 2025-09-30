@@ -45,7 +45,6 @@ interface BaroCardConfig {
   entity: string;
   language?: string;
   unit?: 'hpa' | 'mm' | 'in';
-  needle_color?: string;
   tick_color?: string;
   show_icon?: boolean;
   show_label?: boolean;    
@@ -117,7 +116,6 @@ export class HaTbaroCard extends LitElement {
     }
 
     this.config = {
-      needle_color: 'var(--primary-color)',
       tick_color: 'var(--primary-text-color)',
       show_icon: true,
       show_label: true,
@@ -328,7 +326,7 @@ export class HaTbaroCard extends LitElement {
     const iconYOffset = this.config.icon_y_offset ?? 0;
 
     const iconX = cx - iconSize / 2;
-    const baseIconY = gaugeAngle === 180 ? cy - r / 2 - 20 : cy - iconSize / 2; // Adjusted for 180° to move up
+    const baseIconY = gaugeAngle === 180 ? cy - r / 2 - 20 : cy - iconSize / 2;
     const iconY = baseIconY + iconYOffset;
 
     const labelY = gaugeAngle === 180 ? cy - 25 : cy + 60;
