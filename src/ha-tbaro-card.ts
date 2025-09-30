@@ -184,16 +184,16 @@ export class HaTbaroCard extends LitElement {
       }
 
       const hpaHistory = historyData.map((state: any) => {
-        if (!state || !state.state || (typeof state.state !== 'string' && typeof state.state !== 'number')) {
+        if (!state || !state.s || (typeof state.s !== 'string' && typeof state.s !== 'number')) {
           console.warn('Skipping invalid state entry:', JSON.stringify(state, null, 2));
           return null;
         }
-        const val = parseFloat(state.state);
+        const val = parseFloat(state.s);
         if (isNaN(val)) {
           console.warn('Invalid state value:', JSON.stringify(state, null, 2));
           return null;
         }
-        const unit = (state.attributes?.unit_of_measurement || 'hPa').toLowerCase().replace(/[^a-z]/g, '');
+        const unit = (state.a?.unit_of_measurement || 'hPa').toLowerCase().replace(/[^a-z]/g, '');
         const factor = HaTbaroCard.UNIT_TO_HPA[unit] ?? 1;
         const hpaValue = val * factor;
         console.log(`Converted ${val} ${unit} to ${hpaValue} hPa`);
@@ -213,7 +213,7 @@ export class HaTbaroCard extends LitElement {
 
       if (this.config.show_trend) {
         const lastDayStart = new Date(endTime.getTime() - 24 * 60 * 60 * 1000);
-        const lastDayHpa = hpaHistory.filter((_, idx) => new Date(historyData[idx].last_changed) >= lastDayStart);
+        const lastDayHpa = hpaHistory.filter((_, idx) => new Date(historyData[idx].lu * 1000) >= lastDayStart);
         const avgLastDay = lastDayHpa.length > 0 ? lastDayHpa.reduce((a, b) => a + b, 0) / lastDayHpa.length : this.rawHpa;
         const diff = this.rawHpa - avgLastDay;
         this._trend = diff > 1 ? 'up' : diff < -1 ? 'down' : 'stable';
