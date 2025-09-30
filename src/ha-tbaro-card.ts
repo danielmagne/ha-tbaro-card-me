@@ -348,7 +348,7 @@ export class HaTbaroCard extends LitElement {
     const iconY = baseIconY + iconYOffset;
 
     const labelY = gaugeAngle === 180 ? cy - 25 : cy + 60;
-    const pressureY = gaugeAngle === 180 ? cy : cy + 85;
+    const pressureY = gaugeAngle === 180 ? cy : cy + 60; // Moved upward from cy + 85 to cy + 60
 
     const lang = this.config.language || this.hass?.locale?.language || 'en';
     if (!Object.keys(this._translations).length || !this._translations[lang]) {
