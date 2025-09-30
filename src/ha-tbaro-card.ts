@@ -175,28 +175,34 @@ export class HaTbaroCard extends LitElement {
       });
 
       const historyData = response[this.config.entity] || [];
+      console.log('Raw history data:', historyData); // Debug raw data
       if (historyData.length === 0) {
         console.warn('No history data for', this.config.entity);
-        this._minHpa = this.rawHpa; // Fallback to current value if no history
+        this._minHpa = this.rawHpa;
         this._maxHpa = this.rawHpa;
         return;
       }
 
       const hpaHistory = historyData.map((state: any) => {
         const val = parseFloat(state.state);
-        if (isNaN(val)) return null;
+        if (isNaN(val)) {
+          console.warn('Invalid state value:', state.state);
+          return null;
+        }
         const unit = (state.attributes?.unit_of_measurement || 'hPa').toLowerCase().replace(/[^a-z]/g, '');
         const factor = HaTbaroCard.UNIT_TO_HPA[unit] ?? 1;
-        return val * factor;
+        const hpaValue = val * factor;
+        console.log(`Converted ${val} ${unit} to ${hpaValue} hPa`);
+        return hpaValue;
       }).filter((v: number | null) => v !== null) as number[];
 
-      console.log('hpaHistory:', hpaHistory); // Debug log
+      console.log('hpaHistory:', hpaHistory); // Debug processed history
       if (hpaHistory.length > 0 && this.config.show_min_max) {
         this._minHpa = Math.min(...hpaHistory);
         this._maxHpa = Math.max(...hpaHistory);
         console.log('Min/Max set:', this._minHpa, this._maxHpa);
       } else {
-        this._minHpa = this.rawHpa; // Fallback if no valid history
+        this._minHpa = this.rawHpa;
         this._maxHpa = this.rawHpa;
       }
 
@@ -211,31 +217,30 @@ export class HaTbaroCard extends LitElement {
       this._history = historyData;
     } catch (error) {
       console.error('Error fetching history for ha-tbaro-card:', error);
-      this._minHpa = this.rawHpa; // Fallback on error
+      this._minHpa = this.rawHpa;
       this._maxHpa = this.rawHpa;
       this._trend = undefined;
     }
   }
 
-  private static readonly HPA_TO_MM  = 0.75006156;
-  private static readonly HPA_TO_IN  = 0.02953;
-  private static readonly MM_TO_HPA  = 1 / HaTbaroCard.HPA_TO_MM;
-  private static readonly IN_TO_HPA  = 1 / HaTbaroCard.HPA_TO_IN;
+  private static readonly HPA_TO_MM = 0.75006156;
+  private static readonly HPA_TO_IN = 0.02953;
+  private static readonly MM_TO_HPA = 1 / HaTbaroCard.HPA_TO_MM;
+  private static readonly IN_TO_HPA = 1 / HaTbaroCard.HPA_TO_IN;
 
   private static readonly UNIT_TO_HPA: Record<string, number> = {
-    hpa:   1,
-    mbar:  1,
-    mm:    HaTbaroCard.MM_TO_HPA,
-    mmhg:  HaTbaroCard.MM_TO_HPA,
-    in:    HaTbaroCard.IN_TO_HPA,
-    inhg:  HaTbaroCard.IN_TO_HPA,
+    hpa: 1,
+    mbar: 1,
+    mm: HaTbaroCard.MM_TO_HPA,
+    mmhg: HaTbaroCard.MM_TO_HPA,
+    in: HaTbaroCard.IN_TO_HPA,
+    inhg: HaTbaroCard.IN_TO_HPA,
   };
 
   private get rawHpa(): number {
     const s = this.hass.states[this.config.entity];
     const val = s ? parseFloat(s.state) : 1013.25;
-    const key = (s?.attributes?.unit_of_measurement || 'hPa')
-                  .toLowerCase().replace(/[^a-z]/g, '');
+    const key = (s?.attributes?.unit_of_measurement || 'hPa').toLowerCase().replace(/[^a-z]/g, '');
     const factor = HaTbaroCard.UNIT_TO_HPA[key] ?? 1;
     return val * factor;
   }
@@ -417,22 +422,20 @@ export class HaTbaroCard extends LitElement {
       const markerSize = min_max_marker_size;
       const rPointer = r + stroke_width / 2 + 2;
       
-      const createTriangle = (angle: number, color: string, label: string) => {
+      // Create arrow shape
+      const createArrow = (angle: number, color: string) => {
         const tip = this.polar(cx, cy, rPointer + markerSize, angle);
-        const base1 = this.polar(cx, cy, rPointer, angle - 0.1);
-        const base2 = this.polar(cx, cy, rPointer, angle + 0.1);
-        const labelPos = this.polar(cx, cy, rPointer + markerSize + 10, angle);
-        
+        const base1 = this.polar(cx, cy, rPointer, angle - 0.2);
+        const base2 = this.polar(cx, cy, rPointer, angle + 0.2);
         return svg`
           <polygon points="${tip.x},${tip.y} ${base1.x},${base1.y} ${base2.x},${base2.y}" 
-                   fill="${color}" stroke="#000" stroke-width="0.5" />
-          <text x="${labelPos.x}" y="${labelPos.y + 3}" class="min-max-label" fill="${color}">${label}</text>
+                   fill="${color}" stroke="${color}" stroke-width="0.5" />
         `;
       };
       
       return svg`
-        ${createTriangle(minAngle, '#5599ff', 'MIN')}
-        ${createTriangle(maxAngle, '#ff7755', 'MAX')}
+        ${createArrow(minAngle, '#5599ff')} <!-- Blue arrow for min -->
+        ${createArrow(maxAngle, '#ff7755')} <!-- Red arrow for max -->
       `;
     })();
 
