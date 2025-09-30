@@ -132,7 +132,7 @@ export class HaTbaroCard extends LitElement {
       show_trend: true,
       history_days: 7,
       unfilled_color: '#333333',
-      min_max_marker_size: 5, // Reduced from 8 to 5 for smaller arrows
+      min_max_marker_size: 5, // Default size, adjustable via config
       major_tick_width: 1.5,
       major_tick_length: 2,
       tap_action: { action: 'more-info' },
@@ -205,8 +205,6 @@ export class HaTbaroCard extends LitElement {
           } else if (!loggedNull && state.s === null) {
             console.warn('Invalid state value (null):', JSON.stringify(state, null, 2));
             loggedNull = true;
-          } else {
-            console.warn('Invalid state value:', JSON.stringify(state, null, 2));
           }
           return null;
         }
@@ -350,7 +348,7 @@ export class HaTbaroCard extends LitElement {
 
     const pressure = this.pressure;
     const { tick_color, size, segments, angle: gaugeAngle = 270, border = 'outer', stroke_width = 20,
-            major_tick_width = 1.5, major_tick_length = 2, min_max_marker_size = 5 } = this.config; // Using config value
+            major_tick_width = 1.5, major_tick_length = 2, min_max_marker_size = 5 } = this.config;
     const cx = 150, r = 110, cy = 150;
     const minP = 950, maxP = 1050;
 
@@ -443,13 +441,13 @@ export class HaTbaroCard extends LitElement {
       
       const markerSize = min_max_marker_size; // Use config value, default 5
       const rOuter = r + stroke_width / 2 + 2; // Start at the outer edge
-      const rInner = rOuter - markerSize; // Point inward toward the center
+      const rInner = rOuter - markerSize * 1.5; // Extend inward more for a pronounced tip
 
-      // Create small inward-pointing arrow (triangle pointing down)
+      // Create narrower inward-pointing arrow
       const createArrow = (angle: number, color: string) => {
         const tip = this.polar(cx, cy, rInner, angle); // Tip points inward
-        const base1 = this.polar(cx, cy, rOuter, angle - 0.2); // Base points outward
-        const base2 = this.polar(cx, cy, rOuter, angle + 0.2); // Base points outward
+        const base1 = this.polar(cx, cy, rOuter, angle - 0.1); // Narrower base
+        const base2 = this.polar(cx, cy, rOuter, angle + 0.1); // Narrower base
         return svg`
           <polygon points="${tip.x},${tip.y} ${base1.x},${base1.y} ${base2.x},${base2.y}" 
                    fill="${color}" stroke="${color}" stroke-width="0.5" />
