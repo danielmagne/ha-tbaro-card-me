@@ -61,6 +61,8 @@ interface BaroCardConfig {
   show_min_max?: boolean;
   show_trend?: boolean;
   history_days?: number;
+  unfilled_color?: string;
+  min_max_marker_size?: number;
 }
 
 @customElement('ha-tbaro-card')
@@ -81,11 +83,22 @@ export class HaTbaroCard extends LitElement {
       svg { display: block; margin: auto; }
       .label {
         text-anchor: middle;
-        fill: #000;
+        fill: var(--primary-text-color, #000);
         font-family: sans-serif;
+      }
+      .trend-indicator {
+        font-size: 24px;
+        font-weight: bold;
+        fill: var(--primary-text-color, #000);
+      }
+      .min-max-label {
+        font-size: 10px;
+        font-weight: bold;
+        text-anchor: middle;
       }
       ha-card {
         cursor: pointer;
+        background: var(--card-background-color, #1c1c1c);
       }
     `,
     weatherStyles
@@ -117,6 +130,8 @@ export class HaTbaroCard extends LitElement {
       show_min_max: true,
       show_trend: true,
       history_days: 7,
+      unfilled_color: '#2a2a2a',
+      min_max_marker_size: 8,
       tap_action: { action: 'more-info' },
       double_tap_action: { action: 'none' },
       segments: [
@@ -140,7 +155,7 @@ export class HaTbaroCard extends LitElement {
 
   private async _fetchHistory() {
     try {
-     let days = this.config.history_days ?? 7; // Fallback to 7 if undefined
+     let days = this.config.history_days ?? 7;
       if (days <= 0) {
         console.warn('Invalid history_days, using default of 7');
         days = 7;
@@ -159,7 +174,6 @@ export class HaTbaroCard extends LitElement {
       const historyData = response[this.config.entity] || [];
       if (historyData.length === 0) return;
   
-      // Convert all states to hPa using the same logic as rawHpa
       const hpaHistory = historyData.map((state: any) => {
         const val = parseFloat(state.state);
         if (isNaN(val)) return null;
@@ -174,7 +188,6 @@ export class HaTbaroCard extends LitElement {
       }
   
       if (this.config.show_trend) {
-        // Get states from last 24h for average
         const lastDayStart = new Date(endTime.getTime() - 24 * 60 * 60 * 1000);
         const lastDayHpa = hpaHistory.filter((_, idx) => new Date(historyData[idx].last_changed) >= lastDayStart);
         const avgLastDay = lastDayHpa.length > 0 ? lastDayHpa.reduce((a, b) => a + b, 0) / lastDayHpa.length : this.rawHpa;
@@ -196,7 +209,6 @@ export class HaTbaroCard extends LitElement {
   private static readonly MM_TO_HPA  = 1 / HaTbaroCard.HPA_TO_MM;
   private static readonly IN_TO_HPA  = 1 / HaTbaroCard.HPA_TO_IN;
 
-  /** Conversion multipliers for units to hPa */
   private static readonly UNIT_TO_HPA: Record<string, number> = {
     hpa:   1,
     mbar:  1,
@@ -297,7 +309,7 @@ export class HaTbaroCard extends LitElement {
     if (!this.config) return html``;
 
     const pressure = this.pressure;
-    const { needle_color, tick_color, size, segments, angle: gaugeAngle = 270, border = 'outer' } = this.config;
+    const { tick_color, size, segments, angle: gaugeAngle = 270, border = 'outer' } = this.config;
     const stroke_width = this.config.stroke_width ?? 20;
     const cx = 150, r = 110, cy = 150;
     const minP = 950, maxP = 1050;
@@ -326,11 +338,24 @@ export class HaTbaroCard extends LitElement {
     const weather = this.getWeatherInfo();
     const label = this._translations[weather.key] || weather.key;
 
-    const arcs = segments!.map(seg => {
-      const aStart = startAngle + ((seg.from - minP) / (maxP - minP)) * (endAngle - startAngle);
-      const aEnd = startAngle + ((seg.to - minP) / (maxP - minP)) * (endAngle - startAngle);
-      return svg`<path d="${this.describeArc(cx, cy, r, aStart, aEnd)}" stroke="${seg.color}" stroke-width="${stroke_width}" fill="none" />`;
+    // Create filled arcs up to current value
+    const filledArcs = segments!.map(seg => {
+      const segStart = startAngle + ((seg.from - minP) / (maxP - minP)) * (endAngle - startAngle);
+      const segEnd = startAngle + ((seg.to - minP) / (maxP - minP)) * (endAngle - startAngle);
+      
+      // Only draw the portion of this segment that's below the current value
+      if (valueAngle <= segStart) {
+        return nothing; // Current value is before this segment
+      }
+      
+      const actualEnd = Math.min(valueAngle, segEnd);
+      return svg`<path d="${this.describeArc(cx, cy, r, segStart, actualEnd)}" stroke="${seg.color}" stroke-width="${stroke_width}" fill="none" stroke-linecap="round" />`;
     });
+
+    // Create unfilled/grey arc for the remaining portion
+    const unfilledArc = valueAngle < endAngle 
+      ? svg`<path d="${this.describeArc(cx, cy, r, valueAngle, endAngle)}" stroke="${this.config.unfilled_color}" stroke-width="${stroke_width}" fill="none" stroke-linecap="round" />`
+      : nothing;
 
     const ticksHpa = [950, 960, 970, 980, 990, 1000, 1010, 1020, 1030, 1040, 1050];
     const TICK_WIDTH = 1;
@@ -359,19 +384,6 @@ export class HaTbaroCard extends LitElement {
       return svg`<text x="${pt.x}" y="${pt.y}" font-size="0.9em" font-weight="bolder" class="label">${display}</text>`;
     });
 
-    const needle = (() => {
-      const needleLength = gaugeAngle === 180 ? r - 5 : r - 35;
-      const baseLength = gaugeAngle === 180 ? 80 : 16;
-      const tip = this.polar(cx, cy, needleLength, valueAngle);
-      const base = this.polar(cx, cy, baseLength, valueAngle);
-      const sideAngle = valueAngle + Math.PI / 2;
-      const offset = gaugeAngle === 180 ? 7 : 5;
-      const baseL = { x: base.x + Math.cos(sideAngle) * offset, y: base.y + Math.sin(sideAngle) * offset };
-      const baseR = { x: base.x - Math.cos(sideAngle) * offset, y: base.y - Math.sin(sideAngle) * offset };
-      const dot = gaugeAngle === 180 ? nothing : svg`<circle cx="${cx}" cy="${cy}" r="10" fill="${tick_color}" />`;
-      return svg`<polygon points="${tip.x},${tip.y} ${baseL.x},${baseL.y} ${baseR.x},${baseR.y}" fill="${needle_color}" />${dot}`;
-    })();
-
     const outerR = r + stroke_width / 2 + 0.5;
     const innerR = r - stroke_width / 2 - 0.5;
     const borderOuter = svg`<path d="${this.describeArc(cx, cy, outerR, startAngle, endAngle)}" stroke="#000" stroke-width="1" fill="none" />`;
@@ -379,40 +391,58 @@ export class HaTbaroCard extends LitElement {
 
     const svgIcon = svg`<image href="${this.getIconDataUrl(weather.icon)}" x="${iconX}" y="${iconY}" width="${iconSize}" height="${iconSize}" />`;
 
-    // Min/Max markers (short lines at outer radius)
+    // Enhanced Min/Max markers with triangular pointers
     const minMaxMarkers = (() => {
       if (!this.config.show_min_max || this._minHpa === undefined || this._maxHpa === undefined) return nothing;
       const clampedMin = Math.max(minP, Math.min(maxP, this._minHpa));
       const clampedMax = Math.max(minP, Math.min(maxP, this._maxHpa));
       const minAngle = startAngle + ((clampedMin - minP) / (maxP - minP)) * (endAngle - startAngle);
       const maxAngle = startAngle + ((clampedMax - minP) / (maxP - minP)) * (endAngle - startAngle);
-      const markerLen = 5;
-      const rOuter = r + stroke_width / 2 + 2;
-      const rInner = rOuter - markerLen;
-      const minP1 = this.polar(cx, cy, rOuter, minAngle);
-      const minP2 = this.polar(cx, cy, rInner, minAngle);
-      const maxP1 = this.polar(cx, cy, rOuter, maxAngle);
-      const maxP2 = this.polar(cx, cy, rInner, maxAngle);
+      
+      const markerSize = this.config.min_max_marker_size ?? 8;
+      const rPointer = r + stroke_width / 2 + 3;
+      
+      // Create triangular pointers
+      const createTriangle = (angle: number, color: string, label: string) => {
+        const tip = this.polar(cx, cy, rPointer + markerSize, angle);
+        const base1 = this.polar(cx, cy, rPointer, angle - 0.1);
+        const base2 = this.polar(cx, cy, rPointer, angle + 0.1);
+        const labelPos = this.polar(cx, cy, rPointer + markerSize + 8, angle);
+        
+        return svg`
+          <polygon points="${tip.x},${tip.y} ${base1.x},${base1.y} ${base2.x},${base2.y}" 
+                   fill="${color}" stroke="#000" stroke-width="0.5" />
+          <text x="${labelPos.x}" y="${labelPos.y + 3}" class="min-max-label" fill="${color}">${label}</text>
+        `;
+      };
+      
       return svg`
-        <line x1="${minP1.x}" y1="${minP1.y}" x2="${minP2.x}" y2="${minP2.y}" stroke="blue" stroke-width="3" />
-        <line x1="${maxP1.x}" y1="${maxP1.y}" x2="${maxP2.x}" y2="${maxP2.y}" stroke="red" stroke-width="3" />
+        ${createTriangle(minAngle, '#4a9eff', 'MIN')}
+        ${createTriangle(maxAngle, '#ff6b4a', 'MAX')}
       `;
     })();
 
-    // Trend arrow (simple SVG path, positioned right of pressure text)
-    const trendArrow = (() => {
+    // Trend indicator with +/- sign
+    const trendIndicator = (() => {
       if (!this.config.show_trend || this._trend === undefined) return nothing;
-      const arrowX = cx + 70; // Adjust based on text width
-      const arrowY = pressureY;
-      let path = '';
+      const trendX = cx + 55;
+      const trendY = pressureY - 2;
+      
+      let symbol = '';
+      let color = tick_color;
+      
       if (this._trend === 'up') {
-        path = 'M0 10 L5 0 L10 10'; // Up arrow
+        symbol = '+';
+        color = '#4a9eff';
       } else if (this._trend === 'down') {
-        path = 'M0 0 L5 10 L10 0'; // Down arrow
+        symbol = '−'; // Using minus sign (U+2212) instead of hyphen
+        color = '#ff6b4a';
       } else {
-        path = 'M0 5 L10 5'; // Flat line
+        symbol = '=';
+        color = '#888';
       }
-      return svg`<path d="${path}" stroke="${tick_color}" stroke-width="2" fill="none" transform="translate(${arrowX}, ${arrowY - 5})" />`;
+      
+      return svg`<text x="${trendX}" y="${trendY}" class="trend-indicator" fill="${color}">${symbol}</text>`;
     })();
 
     const viewHeight = gaugeAngle === 180 ? 180 : 300;
@@ -432,12 +462,12 @@ export class HaTbaroCard extends LitElement {
       >
         <div style="overflow:hidden;height:${clipHeight};"></div>
         ${svg`<svg viewBox="0 0 300 ${viewHeight}" style="max-width:${size}px;height:auto">
+          ${unfilledArc}
+          ${filledArcs}
           ${this.config.border !== 'none' && (this.config.border === 'inner' || this.config.border === 'both') ? borderInner : nothing}
           ${this.config.border === 'outer' || this.config.border === 'both' ? borderOuter : nothing}
-          ${arcs}
           ${ticks}
           ${labels}
-          ${needle}
           ${minMaxMarkers}
           ${this.config.show_icon ? svgIcon : nothing}
           ${this.config.show_label ? html`<text x="${cx}" y="${labelY}" font-size="14" class="label">${label}</text>` : nothing}
@@ -449,7 +479,7 @@ export class HaTbaroCard extends LitElement {
                   : Math.round(pressure) + ' hPa'
             }
           </text>
-          ${trendArrow}
+          ${trendIndicator}
         </svg>`}
       </ha-card>
     `;
