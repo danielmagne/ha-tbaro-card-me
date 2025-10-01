@@ -621,7 +621,7 @@ class HaTbaroCardEditor extends LitElement {
         .hass=${this.hass}
         .data=${this.config}
         .schema=${this._schema}
-        .computeLabel=${(schema) => schema.name}
+        .computeLabel=${(schema: { name: string }) => schema.name} // Explicitly type the schema parameter
         @value-changed=${this._valueChanged}
       ></ha-form>
     `;
