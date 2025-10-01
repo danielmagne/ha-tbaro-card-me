@@ -7,6 +7,7 @@ import { LitElement, html, css, svg, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { unsafeSVG } from 'lit/directives/unsafe-svg.js';
 
+// @ts-ignore
 import weatherStyles from './styles.js'; // External weather-related CSS
 import sunIcon from './icons/sun.svg';
 import rainIcon from './icons/rain.svg';
