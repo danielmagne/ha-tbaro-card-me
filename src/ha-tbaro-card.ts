@@ -1,14 +1,12 @@
 // ha-tbaro-card-me.ts
-// Custom Home Assistant card for displaying a barometer gauge
-// Built using LitElement for reactive rendering
-// Date: October 01, 2025
 
 import { LitElement, html, css, svg, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { unsafeSVG } from 'lit/directives/unsafe-svg.js';
 
+// Import SVG icons as strings via rollup-plugin-string
 // @ts-ignore
-import weatherStyles from './styles.js'; // External weather-related CSS
+import weatherStyles from './styles.js';
 import sunIcon from './icons/sun.svg';
 import rainIcon from './icons/rain.svg';
 import partlyIcon from './icons/partly.svg';
@@ -20,18 +18,17 @@ import ru from '../locales/ru.json';
 import es from '../locales/es.json';
 import de from '../locales/de.json';
 
+// Print version to console
 import { version, name } from '../package.json';
 export const printVersionToConsole = () => {};
 printVersionToConsole();
 
-// Interface for defining pressure segments with colors
 interface Segment {
-  from: number; // Start pressure (hPa)
-  to: number;   // End pressure (hPa)
-  color: string; // Segment color
+  from: number;
+  to: number;
+  color: string;
 }
 
-// Home Assistant action interface
 interface HassActionConfig {
   action: 'more-info' | 'navigate' | 'call-service' | 'none' | string;
   entity?: string;
@@ -40,14 +37,13 @@ interface HassActionConfig {
   service_data?: Record<string, any>;
 }
 
-// Card configuration interface
 interface BaroCardConfig {
   entity: string;
   language?: string;
   unit?: 'hpa' | 'mm' | 'in';
   tick_color?: string;
   show_icon?: boolean;
-  show_label?: boolean;
+  show_label?: boolean;    
   stroke_width?: number;
   size?: number;
   icon_size?: number;
@@ -69,9 +65,9 @@ interface BaroCardConfig {
 
 @customElement('ha-tbaro-card')
 export class HaTbaroCard extends LitElement {
-  @property({ attribute: false }) hass: any; // HA object
+  @property({ attribute: false }) hass: any;
   @property({ type: Object }) config!: BaroCardConfig;
-  @state() private _history?: any[]; // Historical pressure data
+  @state() private _history?: any[];
   @state() private _minHpa?: number;
   @state() private _maxHpa?: number;
   @state() private _trend?: 'up' | 'down' | 'stable';
@@ -79,11 +75,10 @@ export class HaTbaroCard extends LitElement {
   private _translations: Record<string, string> = {};
   private static _localeMap: Record<string, Record<string, string>> = { fr, en, ru, es, de };
 
-  // ─── Styles ───
   static styles = [
     css`
       :host { display: block; }
-      svg { display: block; margin: 0 auto; } // Center SVG
+      svg { display: block; margin: auto; }
       .label {
         text-anchor: middle;
         fill: var(--primary-text-color, #000);
@@ -102,20 +97,20 @@ export class HaTbaroCard extends LitElement {
       ha-card {
         cursor: pointer;
         background: var(--card-background-color, #1c1c1c);
-        display: flex;
-        justify-content: center;
-        align-items: center;
       }
     `,
     weatherStyles
   ];
 
-  // ─── Set config with defaults ───
   setConfig(config: BaroCardConfig) {
     if (!config.entity) throw new Error("Entity is required");
 
     const lang = (config.language || this.hass?.locale?.language || 'en').toLowerCase();
-    this._translations = HaTbaroCard._localeMap[lang] || HaTbaroCard._localeMap['en'];
+    if (!HaTbaroCard._localeMap[lang]) {
+      this._translations = HaTbaroCard._localeMap['en'];
+    } else {
+      this._translations = HaTbaroCard._localeMap[lang];
+    }
 
     this.config = {
       tick_color: 'var(--primary-text-color)',
@@ -147,26 +142,23 @@ export class HaTbaroCard extends LitElement {
     };
   }
 
-  // ─── Fetch history when HA or config changes ───
   protected async updated(changedProperties: Map<string | number | symbol, unknown>) {
     super.updated(changedProperties);
-    if ((changedProperties.has('hass') || changedProperties.has('config')) &&
-        this.hass && this.config.entity &&
-        (this.config.show_min_max || this.config.show_trend)) {
-      await this._fetchHistory();
+    if (changedProperties.has('hass') || changedProperties.has('config')) {
+      if ((this.config.show_min_max || this.config.show_trend) && this.hass && this.config.entity) {
+        await this._fetchHistory();
+      }
     }
   }
 
-  // ─── Fetch historical pressure data ───
   private async _fetchHistory() {
     try {
       let days = this.config.history_days ?? 7;
-      if (days <= 0) days = 7;
-
+      if (days <= 0) {
+        days = 7;
+      }
       const endTime = new Date();
       const startTime = new Date(endTime.getTime() - days * 24 * 60 * 60 * 1000);
-
-      // Call HA WS for history
       const response = await this.hass.callWS({
         type: 'history/history_during_period',
         start_time: startTime.toISOString(),
@@ -177,31 +169,40 @@ export class HaTbaroCard extends LitElement {
       });
 
       const historyData = response[this.config.entity] || [];
-      if (!historyData.length) {
+      if (historyData.length === 0) {
         this._minHpa = this.rawHpa;
         this._maxHpa = this.rawHpa;
         return;
       }
 
-      let loggedNull = false, loggedUnknown = false;
+      let loggedNull = false;
+      let loggedUnknown = false;
 
-      // Normalize historical pressure values to hPa
       const hpaHistory = historyData.map((state: any) => {
         if (!state || !state.s || (typeof state.s !== 'string' && typeof state.s !== 'number')) {
-          if (state.s === null && !loggedNull) loggedNull = true;
-          if (state.s === 'unknown' && !loggedUnknown) loggedUnknown = true;
+          if (state.s === null && !loggedNull) {
+            loggedNull = true;
+          } else if (state.s === 'unknown' && !loggedUnknown) {
+            loggedUnknown = true;
+          }
           return null;
         }
         const val = parseFloat(state.s);
-        if (isNaN(val)) return null;
-
+        if (isNaN(val)) {
+          if (!loggedUnknown && state.s === 'unknown') {
+            loggedUnknown = true;
+          } else if (!loggedNull && state.s === null) {
+            loggedNull = true;
+          }
+          return null;
+        }
         const unit = (state.a?.unit_of_measurement || 'hPa').toLowerCase().replace(/[^a-z]/g, '');
         const factor = HaTbaroCard.UNIT_TO_HPA[unit] ?? 1;
-        return val * factor;
+        const hpaValue = val * factor;
+        return hpaValue;
       }).filter((v: number | null) => v !== null) as number[];
 
-      // Calculate min/max for markers
-      if (hpaHistory.length && this.config.show_min_max) {
+      if (hpaHistory.length > 0 && this.config.show_min_max) {
         this._minHpa = Math.min(...hpaHistory);
         this._maxHpa = Math.max(...hpaHistory);
       } else {
@@ -209,38 +210,36 @@ export class HaTbaroCard extends LitElement {
         this._maxHpa = this.rawHpa;
       }
 
-      // Calculate trend
       if (this.config.show_trend) {
         const lastDayStart = new Date(endTime.getTime() - 24 * 60 * 60 * 1000);
         const lastDayHpa = hpaHistory.filter((_, idx) => new Date(historyData[idx].lu * 1000) >= lastDayStart);
-        const avgLastDay = lastDayHpa.length ? lastDayHpa.reduce((a, b) => a + b, 0) / lastDayHpa.length : this.rawHpa;
+        const avgLastDay = lastDayHpa.length > 0 ? lastDayHpa.reduce((a, b) => a + b, 0) / lastDayHpa.length : this.rawHpa;
         const diff = this.rawHpa - avgLastDay;
         this._trend = diff > 1 ? 'up' : diff < -1 ? 'down' : 'stable';
       }
 
       this._history = historyData;
     } catch (error) {
-      // Fallback on error
       this._minHpa = this.rawHpa;
       this._maxHpa = this.rawHpa;
       this._trend = undefined;
     }
   }
 
-  // ─── Pressure unit conversions ───
   private static readonly HPA_TO_MM = 0.75006156;
   private static readonly HPA_TO_IN = 0.02953;
   private static readonly MM_TO_HPA = 1 / HaTbaroCard.HPA_TO_MM;
   private static readonly IN_TO_HPA = 1 / HaTbaroCard.HPA_TO_IN;
+
   private static readonly UNIT_TO_HPA: Record<string, number> = {
-    hpa: 1, mbar: 1,
+    hpa: 1,
+    mbar: 1,
     mm: HaTbaroCard.MM_TO_HPA,
     mmhg: HaTbaroCard.MM_TO_HPA,
     in: HaTbaroCard.IN_TO_HPA,
     inhg: HaTbaroCard.IN_TO_HPA,
   };
 
-  // ─── Current raw pressure in hPa ───
   private get rawHpa(): number {
     const s = this.hass.states[this.config.entity];
     const val = s ? parseFloat(s.state) : 1013.25;
@@ -249,19 +248,16 @@ export class HaTbaroCard extends LitElement {
     return val * factor;
   }
 
-  // ─── Pressure in configured unit ───
   get pressure(): number {
     if (this.config.unit === 'mm') return this.rawHpa * HaTbaroCard.HPA_TO_MM;
     if (this.config.unit === 'in') return this.rawHpa * HaTbaroCard.HPA_TO_IN;
     return this.rawHpa;
   }
 
-  // ─── Convert polar to cartesian coordinates ───
   polar(cx: number, cy: number, r: number, angle: number) {
     return { x: cx + Math.cos(angle) * r, y: cy + Math.sin(angle) * r };
   }
 
-  // ─── Generate SVG arc path ───
   describeArc(cx: number, cy: number, r: number, start: number, end: number) {
     const s = this.polar(cx, cy, r, start);
     const e = this.polar(cx, cy, r, end);
@@ -269,7 +265,6 @@ export class HaTbaroCard extends LitElement {
     return `M ${s.x} ${s.y} A ${r} ${r} 0 ${largeArc} 1 ${e.x} ${e.y}`;
   }
 
-  // ─── Map weather ID to data URL ───
   getIconDataUrl(id: string): string | undefined {
     const svgMap: Record<string, string> = { sun: sunIcon, rain: rainIcon, partly: partlyIcon, storm: stormIcon };
     const raw = svgMap[id];
@@ -277,7 +272,6 @@ export class HaTbaroCard extends LitElement {
     return `data:image/svg+xml,${encodeURIComponent(raw).replace(/'/g, '%27').replace(/"/g, '%22')}`;
   }
 
-  // ─── Determine weather info based on pressure ───
   private getWeatherInfo(): { key: string; icon: string } {
     const hpa = this.rawHpa;
     if (hpa < 980) return { key: 'storm', icon: 'storm' };
@@ -286,7 +280,6 @@ export class HaTbaroCard extends LitElement {
     return { key: 'sun', icon: 'sun' };
   }
 
-  // ─── Map to MDI icons ───
   private getMdiIcon(id: string): string {
     const map: Record<string, string> = {
       sun: 'mdi:weather-sunny',
@@ -297,21 +290,29 @@ export class HaTbaroCard extends LitElement {
     return map[id] ?? 'mdi:weather-cloudy';
   }
 
-  // ─── Handle user tap/double-tap actions ───
   private _handleAction(evt: MouseEvent, actionConfig?: HassActionConfig): void {
     if (!actionConfig || actionConfig.action === 'none') return;
+
     evt.stopPropagation();
 
     const config = { ...actionConfig };
 
     switch (config.action) {
       case 'more-info':
-        this.dispatchEvent(new CustomEvent('hass-more-info', { bubbles: true, composed: true, detail: { entityId: config.entity || this.config.entity }}));
+        this.dispatchEvent(new CustomEvent('hass-more-info', {
+          bubbles: true,
+          composed: true,
+          detail: { entityId: config.entity || this.config.entity }
+        }));
         break;
       case 'navigate':
         if (config.path) {
           history.pushState(null, '', config.path);
-          this.dispatchEvent(new CustomEvent('hass-navigate', { bubbles: true, composed: true, detail: { path: config.path }}));
+          this.dispatchEvent(new CustomEvent('hass-navigate', {
+            bubbles: true,
+            composed: true,
+            detail: { path: config.path }
+          }));
         }
         break;
       case 'call-service':
@@ -320,26 +321,24 @@ export class HaTbaroCard extends LitElement {
           this.hass.callService(domain, service, config.service_data);
         }
         break;
+      default:
     }
   }
 
-  // ─── Render the card ───
   render() {
     if (!this.config) return html``;
 
     const pressure = this.pressure;
     const { tick_color, size, segments, angle: gaugeAngle = 270, border = 'outer', stroke_width = 20,
             major_tick_width = 1.5, major_tick_length = 2, min_max_marker_size = 5 } = this.config;
+    const cx = 150, r = 110, cy = 150;
+    const minP = 950, maxP = 1050;
 
-    const cx = 150, r = 110, cy = 150; // Center of gauge
-    const minP = 950, maxP = 1050;       // Pressure range
-
-    // Start/end angles based on 180° or 270° gauge
     const startAngle = gaugeAngle === 180 ? Math.PI : Math.PI * 0.75;
     const endAngle = gaugeAngle === 180 ? Math.PI * 2 : Math.PI * 2.25;
 
     const hpaValue = this.rawHpa;
-    const valueAngle = startAngle + ((hpaValue - minP) / (maxP - minP)) * (endAngle - startAngle); // Angle for current pressure
+    const valueAngle = startAngle + ((hpaValue - minP) / (maxP - minP)) * (endAngle - startAngle);
 
     const iconSize = this.config.icon_size ?? 50;
     const iconYOffset = this.config.icon_y_offset ?? 0;
@@ -349,7 +348,7 @@ export class HaTbaroCard extends LitElement {
     const iconY = baseIconY + iconYOffset;
 
     const labelY = gaugeAngle === 180 ? cy - 25 : cy + 60;
-    const pressureY = gaugeAngle === 180 ? cy : cy + 60;
+    const pressureY = gaugeAngle === 180 ? cy : cy + 60; // Moved upward from cy + 85 to cy + 60
 
     const lang = this.config.language || this.hass?.locale?.language || 'en';
     if (!Object.keys(this._translations).length || !this._translations[lang]) {
@@ -359,26 +358,33 @@ export class HaTbaroCard extends LitElement {
     const weather = this.getWeatherInfo();
     const label = this._translations[weather.key] || weather.key;
 
-    // ─── Background arc ───
+    // Draw complete unfilled background arc first
     const backgroundArc = svg`<path d="${this.describeArc(cx, cy, r, startAngle, endAngle)}" 
       stroke="${this.config.unfilled_color}" 
       stroke-width="${stroke_width}" 
       fill="none" 
       stroke-linecap="round" />`;
 
-    // ─── Filled segments up to current pressure ───
+    // Draw filled colored arcs only up to current value
     const filledArcs = segments!.map(seg => {
       const segStartAngle = startAngle + ((seg.from - minP) / (maxP - minP)) * (endAngle - startAngle);
       const segEndAngle = startAngle + ((seg.to - minP) / (maxP - minP)) * (endAngle - startAngle);
-      if (valueAngle < segStartAngle) return nothing; // Skip segment if not reached
+      
+      if (valueAngle < segStartAngle) {
+        return nothing;
+      }
+      
       const drawEndAngle = Math.min(valueAngle, segEndAngle);
       return svg`<path d="${this.describeArc(cx, cy, r, segStartAngle, drawEndAngle)}" 
-        stroke="${seg.color}" stroke-width="${stroke_width}" fill="none" stroke-linecap="round" />`;
+        stroke="${seg.color}" 
+        stroke-width="${stroke_width}" 
+        fill="none" 
+        stroke-linecap="round" />`;
     });
 
-    // ─── Major ticks and labels ───
     const ticksHpa = [950, 960, 970, 980, 990, 1000, 1010, 1020, 1030, 1040, 1050];
     const TICK_LEN_IN = 2;
+
     const majorTicks = ticksHpa.map(p => {
       const a = startAngle + ((p - minP) / (maxP - minP)) * (endAngle - startAngle);
       const rOuter = r + stroke_width / 2 + major_tick_length;
@@ -388,53 +394,113 @@ export class HaTbaroCard extends LitElement {
       return svg`<line x1="${p1.x}" y1="${p1.y}" x2="${p2.x}" y2="${p2.y}" stroke="${tick_color}" stroke-width="${major_tick_width}" />`;
     });
 
-    const labels = ticksHpa.map(p => {
+    const labelHpa = [950, 960, 970, 980, 990, 1000, 1010, 1020, 1030, 1040, 1050];
+    const labels = labelHpa.map(p => {
       const display =
-        this.config.unit === 'mm' ? Math.round(p * HaTbaroCard.HPA_TO_MM) :
-        this.config.unit === 'in' ? Math.round(p * HaTbaroCard.HPA_TO_IN * 100) / 100 :
-        p;
+        this.config.unit === 'mm'
+          ? (p * HaTbaroCard.HPA_TO_MM).toFixed(0)
+          : this.config.unit === 'in'
+            ? (p * HaTbaroCard.HPA_TO_IN).toFixed(2)
+            : p.toString();
       const a = startAngle + ((p - minP) / (maxP - minP)) * (endAngle - startAngle);
-      const pos = this.polar(cx, cy, r + stroke_width / 2 + 10, a);
-      return svg`<text x="${pos.x}" y="${pos.y}" class="label">${display}</text>`;
+      const pt = this.polar(cx, cy, r - 20, a);
+      return svg`<text x="${pt.x}" y="${pt.y}" font-size="0.6em" class="label">${display}</text>`;
     });
 
-    // ─── Min/max markers ───
-    const minMaxMarkers = [];
-    if (this._minHpa != null) {
-      const a = startAngle + ((this._minHpa - minP) / (maxP - minP)) * (endAngle - startAngle);
-      const pos = this.polar(cx, cy, r, a);
-      minMaxMarkers.push(svg`<circle cx="${pos.x}" cy="${pos.y}" r="${min_max_marker_size}" fill="blue" />`);
-    }
-    if (this._maxHpa != null) {
-      const a = startAngle + ((this._maxHpa - minP) / (maxP - minP)) * (endAngle - startAngle);
-      const pos = this.polar(cx, cy, r, a);
-      minMaxMarkers.push(svg`<circle cx="${pos.x}" cy="${pos.y}" r="${min_max_marker_size}" fill="red" />`);
-    }
+    const outerR = r + stroke_width / 2 + 0.5;
+    const innerR = r - stroke_width / 2 - 0.5;
+    const borderOuter = svg`<path d="${this.describeArc(cx, cy, outerR, startAngle, endAngle)}" stroke="#000" stroke-width="1" fill="none" />`;
+    const borderInner = svg`<path d="${this.describeArc(cx, cy, innerR, startAngle, endAngle)}" stroke="#000" stroke-width="1" fill="none" />`;
 
-    // ─── Trend arrow ───
-    const trendArrow = this._trend
-      ? svg`<text x="${cx}" y="${labelY - 15}" class="trend-indicator">${this._trend === 'up' ? '↑' : this._trend === 'down' ? '↓' : '→'}</text>`
-      : nothing;
+    const svgIcon = svg`<image href="${this.getIconDataUrl(weather.icon)}" x="${iconX}" y="${iconY}" width="${iconSize}" height="${iconSize}" />`;
 
-    // ─── Weather icon ───
-    const iconDataUrl = this.getIconDataUrl(weather.icon);
-    const iconSvg = iconDataUrl ? svg`<image href="${iconDataUrl}" x="${iconX}" y="${iconY}" height="${iconSize}" width="${iconSize}" />` : nothing;
+    const minMaxMarkers = (() => {
+      if (!this.config.show_min_max || this._minHpa === undefined || this._maxHpa === undefined) return nothing;
+      const clampedMin = Math.max(minP, Math.min(maxP, this._minHpa));
+      const clampedMax = Math.max(minP, Math.min(maxP, this._maxHpa));
+      const minAngle = startAngle + ((clampedMin - minP) / (maxP - minP)) * (endAngle - startAngle);
+      const maxAngle = startAngle + ((clampedMax - minP) / (maxP - minP)) * (endAngle - startAngle);
+      
+      const markerSize = min_max_marker_size;
+      const rOuter = r + stroke_width / 2 + 2;
+      const rInner = rOuter - markerSize * 1.5;
 
-    // ─── Compose SVG ───
+      const createArrow = (angle: number, color: string) => {
+        const tip = this.polar(cx, cy, rInner, angle);
+        const base1 = this.polar(cx, cy, rOuter, angle - 0.05);
+        const base2 = this.polar(cx, cy, rOuter, angle + 0.05);
+        return svg`
+          <polygon points="${tip.x},${tip.y} ${base1.x},${base1.y} ${base2.x},${base2.y}" 
+                   fill="${color}" stroke="${color}" stroke-width="0.5" />
+        `;
+      };
+      
+      return svg`
+        ${createArrow(minAngle, '#5599ff')}
+        ${createArrow(maxAngle, '#ff7755')}
+      `;
+    })();
+
+    const trendIndicator = (() => {
+      if (!this.config.show_trend || this._trend === undefined) return nothing;
+      const trendX = cx + 58;
+      const trendY = pressureY - 11; // Adjusted to center with pressure text (font-size 22 / 2)
+      const size = 12;
+      const halfSize = size / 2;
+
+      let points = '';
+      let fillColor = tick_color;
+
+      if (this._trend === 'up') {
+        points = `${trendX},${trendY - halfSize} ${trendX - halfSize},${trendY + halfSize} ${trendX + halfSize},${trendY + halfSize}`;
+        fillColor = '#5599ff';
+      } else if (this._trend === 'down') {
+        points = `${trendX},${trendY + halfSize} ${trendX - halfSize},${trendY - halfSize} ${trendX + halfSize},${trendY - halfSize}`;
+        fillColor = '#ff7755';
+      } else { // stable
+        points = `${trendX - halfSize},${trendY - halfSize} ${trendX + halfSize},${trendY - halfSize} ${trendX},${trendY + halfSize}`;
+        fillColor = '#888';
+      }
+
+      return svg`<polygon points="${points}" fill="${fillColor}" stroke="${fillColor}" stroke-width="0.5" />`;
+    })();
+
+    const viewHeight = gaugeAngle === 180 ? 180 : 300;
+    const clipHeight = gaugeAngle === 180 ? (size! / 300) * 180 : 'auto';
+
     return html`
-      <ha-card @click="${(e: MouseEvent) => this._handleAction(e, this.config.tap_action)}"
-               @dblclick="${(e: MouseEvent) => this._handleAction(e, this.config.double_tap_action)}">
-        <svg width="${size}" height="${size}">
+      <ha-card
+        @click=${(e: MouseEvent) => this._handleAction(e, this.config.tap_action)}
+        @dblclick=${(e: MouseEvent) => this._handleAction(e, this.config.double_tap_action)}
+        @keydown=${(e: KeyboardEvent) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            this._handleAction(e as any, this.config.tap_action);
+          }
+        }}
+        tabindex="0"
+      >
+        <div style="overflow:hidden;height:${clipHeight};"></div>
+        ${svg`<svg viewBox="0 0 300 ${viewHeight}" style="max-width:${size}px;height:auto">
           ${backgroundArc}
           ${filledArcs}
+          ${this.config.border !== 'none' && (this.config.border === 'inner' || this.config.border === 'both') ? borderInner : nothing}
+          ${this.config.border === 'outer' || this.config.border === 'both' ? borderOuter : nothing}
           ${majorTicks}
           ${labels}
           ${minMaxMarkers}
-          ${trendArrow}
-          ${iconSvg}
-          <text x="${cx}" y="${pressureY}" class="label">${pressure.toFixed(1)} ${this.config.unit?.toUpperCase()}</text>
-          <text x="${cx}" y="${labelY}" class="label">${label}</text>
-        </svg>
+          ${this.config.show_icon ? svgIcon : nothing}
+          ${this.config.show_label ? svg`<text x="${cx}" y="${labelY}" font-size="14" class="label">${label}</text>` : nothing}
+          <text x="${cx}" y="${pressureY}" font-size="22" font-weight="bold" class="label">
+            ${this.config.unit === 'mm'
+                ? Math.round(pressure) + ' mmHg'
+                : this.config.unit === 'in'
+                  ? pressure.toFixed(2) + ' inHg'
+                  : Math.round(pressure) + ' hPa'
+            }
+          </text>
+          ${trendIndicator}
+        </svg>`}
       </ha-card>
     `;
   }
